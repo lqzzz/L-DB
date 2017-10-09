@@ -286,3 +286,8 @@ __pycache__/
 *.btm.cs
 *.odx.cs
 *.xsd.cs
+/L-DB.sln
+/L-DB.vcxproj
+/L-DB.vcxproj.filters
+/Catalog.c
+/Mem/obj.h
