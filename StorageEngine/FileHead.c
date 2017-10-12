@@ -67,7 +67,7 @@ int load_page(Page* page,int id,FHead* p){
 	fd_ = fopen(p->filename_, "rb");
 	size_t slot_count = p->row_slot_count;
 	size_t row_len = p->row_len;
-	fseek(fd_, id * PageSize + PageSize, SEEK_CUR);
+	fseek(fd_, (id + 1) * PageSize, SEEK_CUR);
 
 	//load id
 	size_t page_id = 0;
@@ -86,10 +86,10 @@ int load_page(Page* page,int id,FHead* p){
 	fclose(fd_);
 	char* s = page->row_set;
 	char* s1 = page->row_set + 10;
-	page->filename = p->filename_;
+	//page->filename = p->filename_;
 	page->slot_count = slot_count;
 	page->row_len = row_len;
-	page->row_dir = row_dir;
+	//page->row_dir = row_dir;
 	page->page_id = page_id;
 	page->used_slot_size = used_slot;
 	dict_add_entry(p->page_id_map, page_id, page);
