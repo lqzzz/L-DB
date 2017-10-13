@@ -6,6 +6,9 @@
 #include "BufferManager.h"
 #include "Page.h"
 
+#define DIRTY 1
+#define NOT_DIRTY 0
+
 struct PageFrame{
 	int32_t hot_;
 	int16_t is_dirty;
@@ -17,7 +20,6 @@ struct bm {
 	int DB_id;
 	Vector file_head_list;//<FHead>
 	Vector used_page_list;//<PageFram>
-	Vector empty_page_list;//<PageFram>
 	//Vector other_page_list;
 };
 
@@ -28,28 +30,37 @@ static Ptr bm_list_head = NULL;
 static const size_t free_page_count = 4;
 
 static FPtr new_pageframe(char* tablename);
+__inline static FHead* find_file_head(Ptr bm, char* filename);
 
 Ptr get_bm_head(void) {
 	return bm_list_head;
 }
 
-__inline static FPtr get_frame(Page* page) {
-	return (FPtr)((char*)page - sizeof(int32_t) - sizeof(int16_t));
-
+static FPtr get_frame(Page* page) {
+	return (FPtr)((char*)page - (sizeof(struct PageFrame) - sizeof(Page)));
 }
 
-FPtr new_pageframe(char* tablename) {
-	if()
-	return mem_calloc(1, sizeof(struct PageFrame) + PageSize);
+FPtr new_pageframe(char* filename) {
+	FHead* file_head = find_file_head(bm_list_head, filename);
+	if (!file_head)
+		return NULL;
+	FPtr fp = mem_alloc(sizeof(*fp) - sizeof(PageData) + PageSize);
+	fp->hot_ = 1;
+	fp->is_dirty = NOT_DIRTY;
+	page_init(&fp->page_, file_head->row_len, file_head->row_slot_count);
+	return fp;
 }
 
 __inline static FHead* find_file_head(Ptr bm,char* filename) {
 	FHead* file_head = NULL;
+	char flag = 0;
 	VECTOR_FOREACH(file_head, &bm->file_head_list,
-		if (strcmp(file_head->filename_, filename) == 0)
+		if (strcmp(file_head->filename_, filename) == 0) {
+			flag = 1;
 			break;
-		);
-	return file_head;
+		}
+	);
+	return flag ? file_head : NULL;
 }
 
 void add_bm(DBnode* db) {
@@ -62,12 +73,7 @@ void new_bufferManager(DBnode* db) {
 	LIST_INIT(&bm_->bm_list);
 
 	VECTOR_INIT(&bm_->file_head_list, INIT_LEN);
-	VECTOR_INIT(&bm_->empty_page_list, free_page_count);
 	VECTOR_INIT(&bm_->used_page_list, INIT_LEN);
-
-	Vector* v_ = &bm_->empty_page_list;
-	for (size_t i = 0; i < free_page_count; i++) 
-		VECTOR_PUSHBACK(v_, new_pageframe());
 
 	if (bm_list_head == NULL)
 		bm_list_head = bm_;
@@ -78,14 +84,14 @@ void bm_add_file_head(int DBid, FHead* filehead) {
 	VECTOR_PUSHBACK(&(get_buffman(DBid)->file_head_list), filehead);
 }
 
-__inline Page* alloc_page(Ptr bm) {
-	FPtr fp = vector_pop(&bm->empty_page_list);
-	if (fp) 
-		VECTOR_PUSHBACK(&bm->used_page_list, fp);
-	else 
-		VECTOR_PUSHBACK(&bm->used_page_list, fp = new_pageframe());
-	return &fp->page_;
-}
+//__inline Page* alloc_page(Ptr bm) {
+//	FPtr fp = vector_pop(&bm->empty_page_list);
+//	if (fp) 
+//		VECTOR_PUSHBACK(&bm->used_page_list, fp);
+//	else 
+//		VECTOR_PUSHBACK(&bm->used_page_list, fp = new_pageframe());
+//	return &fp->page_;
+//}
 
 //char* get_next_row(Ptr bm,char* filename, size_t *pageiter, size_t *rowiter) {
 //	FHead* file_head = NULL;

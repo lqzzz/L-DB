@@ -1,12 +1,14 @@
 #include"Catalog.h"
-#include "MemPool.h"
-#include "listhead.h"
-#include "Vector.h"
-#include "Pair.h"
+#include"Mem\MemPool.h"
+#include "BaseStruct\Listhead.h"
+#include "Catalog.h"
+#include "BaseStruct\Vector.h"
+#include "StorageEngine\FileHead.h"
+//#include "Pair.h"
 #include <stdio.h>
 #include<sys\stat.h>
 #include<pthread.h>
-#include"BufferManager.h"
+#include"StorageEngine\BufferManager.h"
 static DBnode sys_database;
 
 static Table sys_database_info;
@@ -52,14 +54,14 @@ static DBnode* read_database_info(void) {
 	fclose(fd);
 	fd = fopen("DBInfo.df", "rb+");
 	char ch = fgetc(fd);
+	int db_count;
 	if (ch == EOF) {
-		int db_count = 0;
+		db_count = 0;
 		fseek(fd, 0 - sizeof(char), SEEK_CUR);
 		fwrite(&db_count, sizeof(int), 1, fd);
 		fflush(fd);
 		fclose(fd);
 	}else {
-		int db_count;
 		fseek(fd, 0 - sizeof(char), SEEK_CUR);
 		fread(&db_count, sizeof(int), 1, fd);
 		DBnode *db_ = NULL;

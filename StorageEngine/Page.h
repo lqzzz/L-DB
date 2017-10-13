@@ -12,8 +12,6 @@
 #define P_EMPTY 0
 #define P_NOT_EMPTY 1
 
-
-
 typedef struct {
 	size_t page_id;
 	size_t used_slot_size;
@@ -28,8 +26,8 @@ typedef struct {
 }Page;
 
 //char* page_next_row(Page* page, size_t *rowiter);
-
+Page* new_page(size_t rowlen, size_t slot_count);
 int page_add_row(Page* p, size_t slot_iter, char* row);
-
+void page_init(Page* p, size_t rowlen, size_t slot_count);
 #endif // !PAGE_H
 

@@ -2,7 +2,6 @@
 #define BUFFERMANAGER_H
 #include"../BaseStruct/Vector.h"
 #include"../Catalog.h"
-#include"FileHead.h"
 
 typedef struct bm BufferManager;
 

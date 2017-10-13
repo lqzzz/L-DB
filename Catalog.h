@@ -1,8 +1,8 @@
 #ifndef _DB_H
 #define _DB_H
-#include "listhead.h"
-#include "Vector.h"
-#include "Page.h"
+#include "StorageEngine/Page.h"
+#include "BaseStruct/Listhead.h"
+#include "BaseStruct/Vector.h"
 //#include<WinSock2.h>
 #define INIT_RECROD_NUM 16 
 
@@ -38,19 +38,19 @@ enum Tokentype {
 	JOIN
 };
 
-typedef struct {
-	int col_num;
-	int row_num;
-	size_t col_set_len;
-	size_t row_set_len;
-	
-	char buf_[];//col_set and row_set or msg
-}Sendset;
+//typedef struct {
+//	int col_num;
+//	int row_num;
+//	size_t col_set_len;
+//	size_t row_set_len;
+//	char buf_[];//col_set and row_set or msg
+//}Sendset;
 
 typedef struct column {
 	Listhead list_head; 
 	char* name_;
 	int num_;
+
 	size_t data_len;
 	size_t rec_offset;
 	size_t max_data_len;
@@ -72,6 +72,7 @@ typedef struct Table {
 	Listhead list_head;
 	char* name_;
 	int num_;
+
 	Column *col_head; //collist
 	uint32_t auto_increment;
 	uint32_t rec_size;
@@ -85,6 +86,7 @@ typedef struct DBnode {
 	Listhead list_head;
 	char *name_;
 	int id_;
+
 	Table* table_head;//tablelist
 	int table_count;
 }DBnode;

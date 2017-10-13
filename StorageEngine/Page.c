@@ -2,6 +2,18 @@
 #include"../Mem/MemPool.h"
 #include"Page.h"
 
+Page* new_page(size_t rowlen, size_t slot_count){
+	Page* p = mem_alloc(sizeof(Page) - sizeof(PageData) + PageSize);
+	p->row_len = rowlen;
+	p->slot_count = slot_count;
+	return p;
+}
+
+void page_init(Page* p,size_t rowlen, size_t slot_count){
+	p->row_len = rowlen;
+	p->slot_count = slot_count;
+}
+
 int page_add_row(Page* p, size_t slot_index,char* row) {
 	if (slot_index >= p->slot_count) 
 		return P_ERROR;

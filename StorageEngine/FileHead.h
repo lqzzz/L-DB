@@ -1,15 +1,21 @@
 #ifndef FILEHEAD_H
 #define FILEHEAD_H
 #include<stdint.h>
+
 #include"Page.h"
 #include"../BaseStruct/dict.h"
 #include"../BaseStruct/Listhead.h"
+
+typedef struct {
+	char* filename_;
+	Dict* page_id_map;
+};
 
 typedef struct filehead {
 	char* filename_;
 	size_t row_slot_count;
 	size_t row_len;
-
+	size_t used_size;
 	size_t page_count;
 	int16_t* full_state_dir;//0 is empty, 1 is full, 2 is has row and not full
 	size_t* page_dir; 
