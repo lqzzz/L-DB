@@ -1,6 +1,7 @@
 #include"../BaseStruct/dict.h"
 #include"../BaseStruct/Vector.h"
 #include"../BaseStruct/Listhead.h"
+#include"../StorageEngine/Page.h"
 #include<stdio.h>
 static int main_ret = 0;
 static int test_count = 0;
@@ -115,7 +116,17 @@ void dict_test() {
 	dict_test_add(d);
 	dict_test_del(d);
 }
+
+void page_test_writefilehead(FHead* f) {
+	
+}
+
+void page_test() {
+	FileHeadData* fhd = new_file_head_data(4,)
+}
+
 int main(void) {
+
 	dict_test();
 	printf("%d/%d (%3.2f%%) passed\n", test_pass, test_count, test_pass * 100.0 / test_count);
 }

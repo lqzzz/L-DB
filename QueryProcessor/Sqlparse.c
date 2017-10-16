@@ -1,73 +1,20 @@
-#include "MemPool.h"
-#include "Listhead.h"
-#include "Vector.h"
-#include "Pair.h"
-#include "Catalog.h"
-#include "Scanner.h"
 #include <stdio.h>
+
+#include "Scanner.h"
 #include "Relation.h"
-#include "BufferManager.h"
-#include "FileHead.h"
-#include"PhysicalPlan.h"
+#include "../BaseStruct/Listhead.h"
+#include "../Catalog.h"
+#include "../BaseStruct/Vector.h"
+#include "../Mem/MemPool.h"
+#include "../BaseStruct/Pair.h"
+#include "../StorageEngine/BufferManager.h"
+
 extern int parse_create(DBnode* dbnode, Token** curr);
 extern Table* parse_create_table(DBnode *dbnode,Token** token);
 extern Column* parse_create_column(DBnode *dbnode,Token** token);
 extern int parse_datatype(Column*, int datatype, Token**);
 extern int parse_insert(DBnode*, Token**);
 extern int parse_insert_values(DBnode*,Table*, Vector*, Token**);
-extern FHead* create_table_file(Table*);
-
-FHead* create_table_file(Table* table_) {
-	int16_t *full_state_dir = mem_alloc(sizeof(int16_t)*PageCount);
-	memset(full_state_dir, 0, sizeof(int16_t) * 10);
-
-	size_t *page_dir = mem_alloc(sizeof(size_t)*PageCount);
-
-	for (size_t i = 0; i < PageCount; i++)
-		page_dir[i] = i;
-
-	size_t row_len = table_->data_len;
-
-	size_t data_size = (PageSize - sizeof(size_t) * 2);
-	size_t slot_ = data_size / row_len;
-	while (slot_ * (row_len + sizeof(size_t)) > data_size)
-		slot_--;
-	table_->page_slot_count = slot_;
-
-	fclose(fopen(table_->name_, "a"));
-
-	FHead* file_head = new_file_head(table_->name_,
-			row_len, PageCount, full_state_dir, page_dir, slot_);
-	write_file_head(file_head);
-	
-	size_t* row_dir = mem_alloc(sizeof(size_t)*slot_);
-	for (size_t i = 0; i < slot_; i++){
-		row_dir[i] = i*row_len;
-	}
-
-	FILE* fd_ = fopen(table_->name_, "rb+");
-	fseek(fd_, PageSize, SEEK_CUR);
-
-	char* row_ = mem_calloc(1,row_len);
-	int used_slot_size = 0;
-
-	for (size_t i = 0; i < PageCount; i++){
-		fwrite(&i, sizeof(size_t), 1, fd_);
-		fwrite(&used_slot_size, sizeof(size_t), 1, fd_);
-		fwrite(row_dir, sizeof(size_t), slot_, fd_);
-
-		for (size_t j = 0; j < slot_; j++)
-			fwrite(row_, row_len, 1, fd_);
-	}
-
-	mem_free(row_dir);
-	mem_free(row_);
-
-	fflush(fd_);
-	fclose(fd_);
-	table_info_update(table_);
-	return file_head;
-}
 
 int parse_insert_values(DBnode* db,Table* table,Vector* collist,Token** curr) {
 	if (TOKEN_TYPE != LB) PARSE_ERROR("È±ÉÙ £¨ ");
@@ -228,7 +175,14 @@ static int parse_create(DBnode* dbnode, Token** curr) {
 			dbnode->table_head = table_;
 		else
 			DB_ADD_TABLE(dbnode, table_);
-		bm_add_file_head(dbnode->id_, create_table_file(table_));
+
+		FileHeadData* fhd = new_file_head_data(PageCount, table_->page_slot_count, table_->data_len);
+		FHead* fh = new_file_head(table_->name_, fhd);
+		init_file(fh);
+		bm_add_file_head(dbnode->id_, fh);
+
+		table_info_update(table_);
+
 		return 1;
 	case DATABASE:
 		NEXT_TOKEN;

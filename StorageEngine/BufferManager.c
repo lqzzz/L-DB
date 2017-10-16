@@ -2,7 +2,6 @@
 #include "../Catalog.h"
 #include "../BaseStruct/Vector.h"
 
-#include "FileHead.h"
 #include "BufferManager.h"
 #include "Page.h"
 
@@ -47,7 +46,8 @@ FPtr new_pageframe(char* filename) {
 	FPtr fp = mem_alloc(sizeof(*fp) - sizeof(PageData) + PageSize);
 	fp->hot_ = 1;
 	fp->is_dirty = NOT_DIRTY;
-	page_init(&fp->page_, file_head->row_len, file_head->row_slot_count);
+	page_init(&fp->page_, file_head->filehead->row_len, 
+		file_head->filehead->row_slot_count);
 	return fp;
 }
 
@@ -101,7 +101,7 @@ void bm_add_file_head(int DBid, FHead* filehead) {
 //	size_t page_id = 0;
 //	file_head = find_file_head(bm, filename);
 //
-//	if (page_id = next_page(file_head, pageiter) == -1)
+//	if (page_id = next_page_id(file_head, pageiter) == -1)
 //		return NULL;
 //
 //	if ((page_ = get_page_ptr(file_head, page_id)) == NULL) {
