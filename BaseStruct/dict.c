@@ -50,6 +50,7 @@ int dict_del_gen(Dict * dict, const void * key,int flag) {
 	}
 	mem_free(curr_);
 	dict->ht_.used_--;
+	return 0;
 	return dict_resize_ifneeded(dict);
 }
 
@@ -62,7 +63,8 @@ int dict_del_entry_nofree(Dict * dict, const void * key){
 }
 
 int dict_resize_ifneeded(Dict * dict){
-	if (dict->ht_.size_ > dict->ht_.used_ &&
+	if (dict->ht_.size_>64 &&
+		dict->ht_.size_ > dict->ht_.used_ &&
 		dict->ht_.size_ / dict->ht_.used_ >= 2) {
 		int minnum = dict->ht_.used_;
 		if (minnum < DICT_HT_INITIAL_SIZE)

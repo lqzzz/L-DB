@@ -21,24 +21,24 @@
 }while(0)
 
 #define LIST_FOREACH(curr_node,listhead,action) do{\
-	Listhead *list_head = listhead;\
-	Listhead *curr_ = listhead;\
+	Listhead *_list_head = listhead;\
+	Listhead *_curr = listhead;\
 	do{\
-		curr_node = curr_;\
+		curr_node = _curr;\
 		action\
-	}while((LIST_MOVE_NEXT(&curr_)) != list_head);\
+	}while((LIST_MOVE_NEXT(&_curr)) != _list_head);\
 }while(0)
 
-#define LIST_DEL_ALL(delnode,listhead,delaction)do{\
-	Listhead *head_ = listhead;\
-	Listhead *next_= (listhead)->next_;\
-	while (next_ != head_) {\
-		delnode = next_;\
-		LIST_MOVE_NEXT(&next_);\
-		delaction\
+#define LIST_DEL_ALL(listhead,del_fun)do{\
+	Listhead *_head = listhead;\
+	Listhead *_next = (listhead)->next_;\
+	void* delnode = _head;\
+	while (_next != _head) {\
+		delnode = _next;\
+		LIST_MOVE_NEXT(&_next);\
+		del_fun(delnode);\
 	}\
-	delnode = head_;\
-	delaction\
+	del_fun(delnode);\
 }while(0)
 
 typedef struct Listhead {

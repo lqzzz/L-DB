@@ -1,16 +1,14 @@
 #include "../BaseStruct/Listhead.h"
 #include "../Catalog.h"
 #include "../BaseStruct/Vector.h"
-
 #include "BufferManager.h"
-#include "Page.h"
 
 #define DIRTY 1
 #define NOT_DIRTY 0
 
 struct PageFrame{
 	int32_t hot_;
-	int16_t is_dirty;
+	intNAME_LEN_t is_dirty;
 	Page page_;
 };
 
@@ -26,9 +24,8 @@ typedef struct bm* Ptr;
 typedef struct PageFrame* FPtr;
 
 static Ptr bm_list_head = NULL;
-static const size_t free_page_count = 4;
 
-static FPtr new_pageframe(char* tablename);
+static FPtr new_pageframe(const char* tablename);
 __inline static FHead* find_file_head(Ptr bm, char* filename);
 
 Ptr get_bm_head(void) {
@@ -39,7 +36,7 @@ static FPtr get_frame(Page* page) {
 	return (FPtr)((char*)page - (sizeof(struct PageFrame) - sizeof(Page)));
 }
 
-FPtr new_pageframe(char* filename) {
+FPtr new_pageframe(const char* filename) {
 	FHead* file_head = find_file_head(bm_list_head, filename);
 	if (!file_head)
 		return NULL;
