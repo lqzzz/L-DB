@@ -69,8 +69,8 @@ void new_bufferManager(DBnode* db) {
 	bm_->DB_id = db->id_;
 	LIST_INIT(&bm_->bm_list);
 
-	VECTOR_INIT(&bm_->file_head_list, INIT_LEN);
-	VECTOR_INIT(&bm_->used_page_list, INIT_LEN);
+	VECTOR_INIT_LEN(&bm_->file_head_list, V_INIT_LEN);
+	VECTOR_INIT_LEN(&bm_->used_page_list, V_INIT_LEN);
 
 	if (bm_list_head == NULL)
 		bm_list_head = bm_;

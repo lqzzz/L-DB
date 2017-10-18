@@ -4,14 +4,14 @@
 #include<string.h>
 #define VITER_START_HEAD 0
 #define VITER_START_TAIL 1
-#define INIT_LEN 4
+#define V_INIT_LEN 4
 
 typedef struct Vector{
 	size_t  usedsize_;
 	size_t  freesize_;
 	void*(*dup_)(void*);
 	void(*free_)(void*);
-	int32_t(*comp_)(void*, void*);
+	int(*comp_)(void*, void*);
 	void **vector_;
 }Vector;
 
@@ -30,6 +30,17 @@ typedef struct VectorIter{
 	}\
 }while(0)
 
+#define VECTOR_FREE(v) do{\
+	size_t len_ = (v)->usedsize_;\
+	if ((v)->free_)\
+		for (size_t i = 0; i < len_; ++i)\
+			(v)->free_((v)->vector_[i]);\
+	else\
+		for (size_t i = 0; i < len_; ++i)\
+			mem_free((v)->vector_[i]);\
+	mem_free((v)->vector_);\
+}while(0)
+
 #define VECTOR_CLEAR_VAL(v) do{\
 	size_t len_ = (v)->usedsize_;\
 	if ((v)->free_)\
@@ -41,7 +52,9 @@ typedef struct VectorIter{
 }while(0)
 
 #define VECTOR_CLEAR_NODE(v) mem_free((v)->vector_) 
+
 #define VECTOR_RELEASE(v) VECTOR_CLEAR_VAL(v);VECTOR_CLEAR_NODE(v);mem_free(v)
+
 #define VECTOR_PUSHBACK(v,value) vector_insert((v)->usedsize_,v,value) 
 #define VECTOR_GET_VALUE(v,index) (v)->vector_[index]
 #define VECTOR_RESET(v) memset((v)->vector_, 0, (v)->usedsize_ + (v)->freesize_)
@@ -54,7 +67,9 @@ typedef struct VectorIter{
 	v_->vector_ = memset(v_->vector_ + v_used_size, 0, v_->freesize_ * sizeof(size_t));\
 }while(0)
 
-#define VECTOR_INIT(v,len) memset(v,0,sizeof(Vector)); VECTOR_GROW((v),len)
+#define VECTOR_INIT(v) memset(v,0,sizeof(Vector))
+#define VECTOR_INIT_LEN(v,len) VECTOR_INIT(v); VECTOR_GROW((v),len)
+
 #define VECTOR_HAS_ELEM(v) (v)->usedsize_ ? 1:0
 #define VECTOR_GET_SIZE(v) (v)->usedsize_
 #define VectorGetFreeSize(v) ((v)->freesize_)
@@ -64,7 +79,7 @@ typedef struct VectorIter{
 #define VectorGetFreeMethod(v) ((v)->free_)
 
 #define VectorSetDupMethod(v,dup) ((v)->dup_ = dup)
-#define VectorSetMatchMethod(v,comp) ((v)->comp_ = comp)
+#define VectorSetCompMethod(v,comp) ((v)->comp_ = comp)
 #define VectorSetFreeMethod(v,free) ((v)->free_ = free)
 
 #define VECTOR_INIT_ITER(v,iter) \
@@ -72,9 +87,12 @@ typedef struct VectorIter{
 	(iter)->index_ = 0;\
 	(iter)->end_index = (v)->usedsize_\
 
-Vector* vector_create_len(int count);
-Vector* vector_create();
-int32_t vector_init_v(Vector* dest, Vector *vsrc);
+//Vector* vector_create_len(int count,void*(*dup_)(void*),void(*free_)(void*),int(*comp_)(void*, void*));
+//Vector* vector_create(void*(*dup_)(void*),void(*free_)(void*),int(*comp_)(void*, void*));
+//
+void vector_del_free(Vector*);
+void vector_del_nofree(Vector*);
+
 int32_t vector_insert(size_t index, Vector *v, void* value);
 int32_t vector_copy(Vector* vdest, Vector* vsrc);
 Vector* vector_value_copy(Vector *vsrc);

@@ -1,10 +1,28 @@
 #include "Vector.h"
+
 #define BINARY_SEARCH_FLAG 16
+
+
 #define SWAP(v1,v2) do {\
 	void* temp = v1; \
 	v1 = v2;\
 	v2 = temp;\
 }while(0)
+
+static void vector_del_gen(Vector* v, int flag);
+
+void vector_del_gen(Vector* v, int flag) {
+	size_t size = v->usedsize_;
+	if (flag) {
+		if (v->free_)
+			for (size_t i = 0; i < size; i++)
+				v->free_(v->vector_[i]);
+		else 
+			for (size_t i = 0; i < size; i++)
+				mem_free(v->vector_[i]);
+	}
+	mem_free(v->vector_);
+}
 
 static __inline int32_t default_comp(int* v1, int* v2) {
 	int i1 = *v1;
@@ -39,28 +57,41 @@ static int32_t binary_search(Vector * v,void* key,int32_t(*comp_)(void*, void*))
 	return --lo;
 }
 
-Vector * vector_create_len(int len){
-	Vector *v = mem_calloc(1,sizeof(Vector)); 
+Vector * vector_create_len(int len, void *(*dup_)(void *), void(*free_)(void *), int(*comp_)(void *, void *)){
+	Vector *v = mem_alloc(sizeof(Vector)); 
+	v->dup_ = dup_;
+	v->free_ = free_;
+	v->comp_ = comp_;
 	v->vector_ = mem_calloc(1,sizeof(size_t)*len);
 	v->freesize_ = len;
+
 	return v;
 }
 
-Vector * vector_create(){
-	return vector_create_len(INIT_LEN);
+Vector * vector_create(void *(*dup_)(void *), void(*free_)(void *), int(*comp_)(void *, void *)){
+	return vector_create_len(0, dup_, free_, comp_);
 }
 
-int32_t vector_init_v(Vector * dest, Vector * vsrc){
-	size_t usedsize_ = vsrc->usedsize_;
-	size_t freesize_ = vsrc->freesize_;
-	size_t size_ = usedsize_ + freesize_;
-	VECTOR_INIT(dest, size_);
-	memset(dest, 0, sizeof(Vector));
-	if (vsrc->dup_ == NULL)
-		dest->vector_ = memcpy(dest->vector_, vsrc->vector_, usedsize_ * sizeof(size_t));
-	dest->usedsize_ = usedsize_;
-	dest->freesize_ = freesize_;
-	return 0;
+
+void vector_del_free(Vector * v){
+	vector_del_gen(v, 1);
+}
+
+//int32_t vector_init_v(Vector * dest, Vector * vsrc){
+//	size_t usedsize_ = vsrc->usedsize_;
+//	size_t freesize_ = vsrc->freesize_;
+//	size_t size_ = usedsize_ + freesize_;
+//	VECTOR_INIT_LEN(dest, size_);
+//	memset(dest, 0, sizeof(Vector));
+//	if (vsrc->dup_ == NULL)
+//		dest->vector_ = memcpy(dest->vector_, vsrc->vector_, usedsize_ * sizeof(size_t));
+//	dest->usedsize_ = usedsize_;
+//	dest->freesize_ = freesize_;
+//	return 0;
+//}
+
+void vector_del_nofree(Vector * v){
+	vector_del_gen(v, 0);
 }
 
 int32_t vector_insert(size_t index, Vector * v,void* value){
