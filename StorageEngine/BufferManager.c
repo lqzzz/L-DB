@@ -7,8 +7,8 @@
 #define NOT_DIRTY 0
 
 struct PageFrame{
+	int16_t is_dirty;
 	int32_t hot_;
-	intNAME_LEN_t is_dirty;
 	Page page_;
 };
 
@@ -48,7 +48,7 @@ FPtr new_pageframe(const char* filename) {
 	return fp;
 }
 
-__inline static FHead* find_file_head(Ptr bm,char* filename) {
+__inline static FHead* find_file_head(Ptr bm,const char* filename) {
 	FHead* file_head = NULL;
 	char flag = 0;
 	VECTOR_FOREACH(file_head, &bm->file_head_list,

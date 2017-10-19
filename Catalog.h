@@ -41,6 +41,7 @@ typedef struct {
 	size_t column_not_null;
 	size_t column_unique;
 	size_t column_rec_offset;
+	size_t column_data_len;
 	char column_name[NAME_LEN];
 	char column_table_name[NAME_LEN];
 	char column_db_name[NAME_LEN];
@@ -74,7 +75,7 @@ void* dbnode_search(void* head, const char* name);
 Table* db_get_table(DBnode* db, char* tablename);
 void db_add_table(DBnode* db, Table* t);
 
-Table* new_table();
+Table* new_table(char* tablename,char* dbname,size_t id);
 void table_del(Table* table);
 int table_cmp_name(Table* t1, Table* t2);
 Column* table_get_col(Table* t, char* colname);
@@ -84,14 +85,14 @@ void table_init(Table* table, char* name,
 	size_t columncount,size_t recsize,
 	size_t pageslotcount);
 
-Column* new_column();
+Column* new_column(char* colname, char* tablename, char*dbname, size_t id,enum TokenType DT,size_t datalen);
 int col_cmp_name(Column* col1,Column* col2);
 void col_del(Column* col);
 size_t get_max_data_len(void* item,enum Tokentype datatype,size_t currmaxlen);
 void col_set_info(Column* col,
 	size_t column_num,enum TokenType column_data_type,
 	size_t column_not_null,size_t column_unique,
-	size_t column_rec_offset,char* column_name,
+	size_t column_rec_offset,size_t data_len,char* column_name,
 	char* column_table_name,char* column_db_name );
 
 Record* rec_create(char* schemaname, size_t len);

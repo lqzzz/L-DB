@@ -50,7 +50,6 @@ int dict_del_gen(Dict * dict, const void * key,int flag) {
 	}
 	mem_free(curr_);
 	dict->ht_.used_--;
-	return 0;
 	return dict_resize_ifneeded(dict);
 }
 

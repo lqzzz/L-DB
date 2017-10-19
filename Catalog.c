@@ -12,7 +12,7 @@ void* dbnode_search(void* head,const char* name){
 }
 
 Table * db_get_table(DBnode * db, char * tablename){
-	return vector_search(&db.tables, tablename, table_cmp_name);
+	return vector_search(&db->tables, tablename, table_cmp_name);
 }
 
 void db_add_table(DBnode * db, Table * t){
@@ -30,19 +30,30 @@ DBnode* database_create(char* name,size_t id,size_t tablecount){
 	return dbnode;
 }
 
-Column * new_column(){
-	return mem_alloc(sizeof(Column));
+Column* new_column(char* colname, char* tablename, char*dbname, size_t id,enum TokenType DT,size_t datalen){
+	Column* col = mem_calloc(1,sizeof(Column));
+	strcpy(col->column_name, colname);
+	strcpy(col->column_table_name, tablename);
+	strcpy(col->column_db_name, dbname);
+	col->column_data_type = DT;
+	col->column_num = id;
+	col->column_data_len = datalen;
+	return col;
 }
 
-void col_set_info(Column * col, size_t column_num, enum TokenType column_data_type, size_t column_not_null, size_t column_unique, size_t column_rec_offset, char * column_name, char * column_table_name, char * column_db_name){
-	strcpy(col->column_name, column_name);
-	strcpy(col->column_table_name, column_table_name);
-	strcpy(col->column_db_name, column_db_name);
+void col_set_info(Column * col, size_t column_num, enum TokenType column_data_type, size_t column_not_null, size_t column_unique, size_t column_rec_offset,size_t datalen, char * column_name, char * column_table_name, char * column_db_name){
+	if(column_name)
+		strcpy(col->column_name, column_name);
+	if(column_table_name)
+		strcpy(col->column_table_name, column_table_name);
+	if(column_db_name)
+		strcpy(col->column_db_name, column_db_name);
 	col->column_data_type= column_data_type;
 	col->column_num = column_num;
 	col->column_rec_offset = column_rec_offset;
 	col->column_not_null = column_not_null;
 	col->column_unique = column_unique;
+	col->column_data_len = datalen;
 }
 
 int col_cmp_name(Column * col1, Column * col2){
@@ -113,8 +124,11 @@ void* rec_dup_data(Record * rec,size_t datalen){
 	return data_;
 }
 
-Table* new_table(){
-	Table* t = mem_alloc(sizeof(Table));
+Table* new_table(char* tablename,char* dbname,size_t id){
+	Table* t = mem_calloc(1, sizeof(Table));
+	strcpy(t->t_info.table_name, tablename);
+	strcpy(t->t_info.table_db_name, dbname);
+	t->t_info.table_num = id;
 	VectorSetFreeMethod(&t->cols,col_del);
 	VectorSetCompMethod(&t->cols,col_cmp_name);
 	VECTOR_INIT_LEN(&t->cols, V_INIT_LEN);
@@ -123,9 +137,7 @@ Table* new_table(){
 
 
 void table_init(Table* table, char * name, size_t id, size_t datalen, size_t columncount, size_t recsize, size_t pageslotcount){
-
 	TableInfo* info = &table->t_info;
-
 	strcpy(info->table_name, name);
 	info->table_num = id;
 	info->table_data_len= datalen;
@@ -151,6 +163,8 @@ Column * table_get_col(Table * t, char* colname){
 void table_add_col(Table * t, Column * col){
 	VECTOR_PUSHBACK(&t->cols, col);
 	t->t_info.table_col_count++;
+	col->column_rec_offset = t->t_info.table_data_len;
+	t->t_info.table_data_len += col->column_data_len;
 }
 
 

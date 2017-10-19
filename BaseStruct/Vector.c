@@ -34,17 +34,17 @@ static __inline int32_t default_comp(int* v1, int* v2) {
 	else return 0;
 }
 
-static __inline int32_t linear_search(Vector* v, void* key,int32_t(*comp)(void*, void*)) {	
+static __inline void* linear_search(Vector* v, void* key,int32_t(*comp)(void*, void*)) {	
 	size_t length_ = v->usedsize_;
 	void** vector_ = v->vector_;
 	for (size_t i = 0; i < length_; i++){
 		if (comp(vector_[i], key) == 0)
-			return i;
+			return vector_[i];
 	}
-	return -1;
+	return NULL;
 }
 
-static int32_t binary_search(Vector * v,void* key,int32_t(*comp_)(void*, void*)){
+static void* binary_search(Vector * v,void* key,int32_t(*comp_)(void*, void*)){
 	void **v_ = v->vector_;
 	int32_t lo = 0, hi = v->usedsize_;
 	while (hi > lo) {
@@ -54,7 +54,7 @@ static int32_t binary_search(Vector * v,void* key,int32_t(*comp_)(void*, void*))
 		else 
 			lo = mi + 1;
 	}
-	return --lo;
+	return v_[--lo];
 }
 
 Vector * vector_create_len(int len, void *(*dup_)(void *), void(*free_)(void *), int(*comp_)(void *, void *)){
@@ -150,16 +150,16 @@ VectorIter* vector_get_end(Vector* v) {
 	return iter_;
 }
 	
-Vector* vector_value_copy(Vector * vsrc){
-	size_t usedsize_ = vsrc->usedsize_;
-	size_t freesize_ = vsrc->freesize_;
-	size_t size_ = usedsize_ + freesize_;
-	Vector* v_ = vector_create_len(size_);
-
-	v_->usedsize_ = usedsize_;
-	v_->freesize_ = freesize_ ;
-	return v_;
-}
+//Vector* vector_value_copy(Vector * vsrc){
+//	size_t usedsize_ = vsrc->usedsize_;
+//	size_t freesize_ = vsrc->freesize_;
+//	size_t size_ = usedsize_ + freesize_;
+//	Vector* v_ = vector_create_len(size_);
+//
+//	v_->usedsize_ = usedsize_;
+//	v_->freesize_ = freesize_ ;
+//	return v_;
+//}
 
 void insert_sort(Vector *v) {
 
@@ -182,7 +182,7 @@ void vector_sort(Vector * v){
 	quicksort(v, 0, v->usedsize_ - 1);
 }
 
-int32_t vector_search(Vector * v,void* key,int32_t(*comp)(void*, void*)){
+void* vector_search(Vector * v,void* key,int32_t(*comp)(void*, void*)){
 	if (comp == NULL)
 		comp = default_comp;
 	return v->usedsize_ >= BINARY_SEARCH_FLAG ? binary_search(v, key, comp) 

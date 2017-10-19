@@ -79,6 +79,7 @@ int file_add_row(FHead* fh, size_t pageid, size_t rowindex,const char* row){
 		return P_ERROR;
 	if (p->pdata.used_slot_size == p->slot_count)
 		fh->page_states[pageid] = P_FULL;
+	return P_OK;
 }
 
 FHead* new_file_head(char* filename, FileHeadData* fhd){
@@ -220,9 +221,12 @@ int page_add_row(Page* p, size_t slot_index,const char* row) {
 	char* prow = p->rows_head + offset;
 
 	memcpy(prow, row, p->row_len);
-	puts(prow);
+
+	//puts(prow);
+
 	p->slot_state_head_ptr[slot_index] = P_NOT_EMPTY;
 	p->pdata.used_slot_size++;
+
 	//for (size_t i = 0; i < p->slot_count; i++) {
 	//	char s = p->slot_state_head_ptr[i];
 	//	if (s == P_EMPTY)

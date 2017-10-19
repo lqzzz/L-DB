@@ -9,7 +9,7 @@ void list_del_all(Listhead* head,void del(void* )){
 	del(next_);
 }
 
-void* list_search(Listhead *listhead,void* key,int cmp(void*,void*)){
+void* list_search(Listhead *listhead,const void* key,int cmp(void*,void*)){
 	void *curr_ = NULL;
 	void *result_ = NULL;
 	LIST_FOREACH(curr_,listhead, 
