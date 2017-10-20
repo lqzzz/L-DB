@@ -19,9 +19,11 @@ static Column* col7;
 static Column* col8;
 
 static void meta_test_init(void) {
-	sysdb = init_sys_data();
-	db1 = database_create("T_1", 0, 2);
-	db2 = database_create("T_2", 1, 2);
+	//sysdb = init_sys_data();
+	db1 = database_create("T_1", 0, 0);
+	db2 = database_create("T_2", 1, 0);
+	LIST_ADD_TAIL(&db1->list_head, &db2->list_head);
+
 	t11 = new_table("T_1_1", "T_1", 0);
 	t12 = new_table("T_1_2", "T_1", 1);
 	t21 = new_table("T_2_1", "T_2", 0);
@@ -45,8 +47,12 @@ static void add_test(void) {
 	table_add_col(t21, col6);
 	table_add_col(t22, col7);
 	table_add_col(t22, col8);
-	db_add_table(sysdb, t11);
-	db_add_table(sysdb, t12);
+
+	db_add_table(db1, t11);
+	db_add_table(db1, t12);
+	db_add_table(db2, t21);
+	db_add_table(db2, t22);
+
 	EXPECT_EQ_INT(2, db1->table_count);
 	EXPECT_EQ_INT(2, db2->table_count);
 
@@ -63,11 +69,11 @@ static void add_test(void) {
 	EXPECT_EQ_INT(4, col6->column_rec_offset);
 	EXPECT_EQ_INT(0, col7->column_rec_offset);
 	EXPECT_EQ_INT(4, col8->column_rec_offset);
-
-	
 }
 
 void meta_test(void) {
 	meta_test_init();
 	add_test();
+	db_head_print();
+	db_print(db1);
 }

@@ -1,6 +1,6 @@
 #include"Catalog.h"
 #include"Mem\MemPool.h"
-
+#include<stdio.h>
 int db_match_name(DBnode* node, const char* key){
 	if (node->name_ == NULL || key == NULL)
 		return -1;
@@ -145,6 +145,173 @@ void table_init(Table* table, char * name, size_t id, size_t datalen, size_t col
 	info->table_rec_size= recsize;
 	info->table_page_solt_count = pageslotcount;
 	VECTOR_INIT_LEN(&table->cols, columncount);
+}
+
+void db_head_print(void) {
+	for (size_t i = 0; i < 3; i++){
+		printf("+");
+		int len = 0;
+		switch (i)
+		{
+		case 0:
+			len = 2;
+			break;
+		case 1:
+			len = 6;
+			break;
+		default:
+			len = 8;
+			break;
+		}
+		for (size_t i = 0; i < len; i++)
+			printf("-");
+	}
+	printf("+\n");
+
+	for (size_t i = 0; i < 3; i++){
+		int len = 0;
+		char* str = NULL;
+		switch (i)
+		{
+		case 0:
+			len = 2;
+			str = "ID";
+			break;
+		case 1:
+			len = 6;
+			str = "表数量";
+			break;
+		default:
+			len = 8;
+			str = "数据库名";
+			break;
+		}
+		printf("|%-*s", len, str);
+	}
+	printf("|\n");
+}
+
+void db_print(DBnode* dbh) {
+	DBnode* db = NULL;
+	LIST_FOREACH(db, dbh,
+	for (size_t i = 0; i < 3; i++){
+		int len = 0;
+		char* str = NULL;
+		switch (i)
+		{
+		case 0:
+			len = 2;
+			str = db->id_;
+			printf("|%-*d", len, str);
+			break;
+		case 1:
+			len = 6;
+			str = db->table_count;
+			printf("|%-*d", len, str);
+			break;
+		default:
+			len = 8;
+			str = db->name_;
+			printf("|%-*s", len, str);
+			break;
+		}
+	}
+	printf("|\n");
+	);
+
+
+
+}
+
+void print_head_format() {
+
+}
+
+void table_print(DBnode* db){
+	for (size_t i = 0; i < 8; i++){
+		printf("+");
+		int len = 0;
+		switch (i)
+		{
+		case 0:
+
+			break;
+		case 1:
+
+			break;
+		case 2:
+
+			break;
+		case 3:
+
+			break;
+		case 4:
+
+			break;
+		case 5:
+
+			break;
+		case 6:
+
+			break;
+		case 7:
+
+			break;
+		default:
+
+			break;
+		}
+
+		for (int i = 0; i < len; i++)
+			printf("-");
+		
+	}
+	printf("+\n");
+
+	for (size_t i = 0; i < 8; i++){
+		printf("+");
+		int maxlen;
+		char* itemname;
+		switch (i)
+		{
+		case 0:
+			itemname = "ID";
+			maxlen = 2;
+			break;
+		case 1:
+			itemname = "表名";
+			//maxlen = 4;
+			break;
+		case 2:
+			itemname = "列数目";
+			maxlen = 3;
+			break;
+		case 3:
+			itemname = "每行长度";
+			maxlen = 4;
+			break;
+		case 4:
+			itemname = "行数据量";
+			maxlen = 4;
+			break;
+		case 5:
+			itemname = "每页行数";
+			maxlen = 4;
+			break;
+		case 6:
+			itemname = "所属数据库";
+			//maxlen = 
+			break;
+		default:
+
+			break;
+		}
+
+		//for (int i = 0; i < len; i++)
+		//	printf("-");
+
+	}
+	printf("+\n");
 }
 
 void table_del(Table * table){

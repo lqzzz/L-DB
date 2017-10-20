@@ -217,12 +217,14 @@ void rela_print(Relation * rela){
 			printf("-");
 		);
 	printf("+\n");
+
 	LIST_FOREACH(node_, head_,
 		int max_len = node_->max_len;
 		char* str_ = PairGetSecond(&node_->schema_name);
 		printf("|%-*s", max_len, str_);
 		);
 	printf("|\n");
+
 	LIST_FOREACH(node_, head_,
 		int max_len = node_->max_len;
 		printf("+");
@@ -230,6 +232,8 @@ void rela_print(Relation * rela){
 			printf("-");
 		);
 	printf("+\n");
+
+
 	obj* obj_;
 	VECTOR_FOREACH(obj_, &rela->data_set,
 		if (obj_) {

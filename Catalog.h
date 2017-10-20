@@ -3,7 +3,7 @@
 #include "BaseStruct/Listhead.h"
 #include "BaseStruct/Vector.h"
 
-#define NAME_LEN 32 
+#define NAME_LEN 24 
 
 #define DBNODE_SEARCH(head,key) list_search(head,key,db_match_name)
 
@@ -25,12 +25,12 @@ enum Tokentype {
 };
 
 typedef struct {
-	size_t table_num;
+	size_t table_num;//2
 	size_t table_auto_increment;
-	size_t table_rec_size;
-	size_t table_data_len;
-	size_t table_col_count;
-	size_t table_page_solt_count;
+	size_t table_rec_size;//7
+	size_t table_data_len;//7
+	size_t table_col_count;//8
+	size_t table_page_solt_count;//
 	char table_db_name[NAME_LEN];
 	char table_name[NAME_LEN];
 }TableInfo;
@@ -74,7 +74,10 @@ int db_match_name(DBnode* node, const char* name);
 void* dbnode_search(void* head, const char* name);
 Table* db_get_table(DBnode* db, char* tablename);
 void db_add_table(DBnode* db, Table* t);
+void db_head_print(void);
+void db_print(DBnode* dbh);
 
+void table_print(DBnode* db);
 Table* new_table(char* tablename,char* dbname,size_t id);
 void table_del(Table* table);
 int table_cmp_name(Table* t1, Table* t2);
@@ -84,6 +87,7 @@ void table_init(Table* table, char* name,
 	size_t id, size_t datalen,
 	size_t columncount,size_t recsize,
 	size_t pageslotcount);
+void table_print(Table* t);
 
 Column* new_column(char* colname, char* tablename, char*dbname, size_t id,enum TokenType DT,size_t datalen);
 int col_cmp_name(Column* col1,Column* col2);
