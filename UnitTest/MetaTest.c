@@ -36,9 +36,7 @@ static void meta_test_init(void) {
 	col6 = new_column("T_2_1_2", "T_2_1", "T_2", 1, CHAR, 16);
 	col7 = new_column("T_2_2_1", "T_2_2", "T_2", 0, INT, 4);
 	col8 = new_column("T_2_2_2", "T_2_2", "T_2", 1, CHAR, 16);
-}
 
-static void add_test(void) {
 	table_add_col(t11, col1);
 	table_add_col(t11, col2);
 	table_add_col(t12, col3);
@@ -52,6 +50,10 @@ static void add_test(void) {
 	db_add_table(db1, t12);
 	db_add_table(db2, t21);
 	db_add_table(db2, t22);
+
+}
+
+static void add_test(void) {
 
 	EXPECT_EQ_INT(2, db1->table_count);
 	EXPECT_EQ_INT(2, db2->table_count);
@@ -74,6 +76,5 @@ static void add_test(void) {
 void meta_test(void) {
 	meta_test_init();
 	add_test();
-	db_head_print();
 	db_print(db1);
 }

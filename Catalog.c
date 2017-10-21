@@ -193,6 +193,7 @@ void db_head_print(void) {
 
 void db_print(DBnode* dbh) {
 	DBnode* db = NULL;
+	db_head_print();
 	LIST_FOREACH(db, dbh,
 	for (size_t i = 0; i < 3; i++){
 		int len = 0;
@@ -218,9 +219,7 @@ void db_print(DBnode* dbh) {
 	}
 	printf("|\n");
 	);
-
-
-
+	printf("\n");
 }
 
 void print_head_format() {

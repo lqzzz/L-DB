@@ -7,6 +7,7 @@
 
 int InitServer(void);
 void AcceptTcpHandler(aeEventLoop *el, SOCKET s, void *privdata, int mask);
+
 typedef struct Client {
 	size_t eindex;
 	char command[1024];
@@ -27,17 +28,17 @@ struct Server {
 
 struct Server server;
 
-int main(void) {
-
-	WORD sockVersion = MAKEWORD(2, 2);
-	WSADATA wsadata;
-	if (WSAStartup(sockVersion, &wsadata) != 0){
-		return 0;
-	}
-
-	InitServer();
-	aeMain(server.el);
-}
+//int main(void) {
+//
+//	WORD sockVersion = MAKEWORD(2, 2);
+//	WSADATA wsadata;
+//	if (WSAStartup(sockVersion, &wsadata) != 0){
+//		return 0;
+//	}
+//
+//	InitServer();
+//	aeMain(server.el);
+//}
 
 void SendReplyToClient(aeEventLoop* el,SOCKET s,void* privdata,int mask) {
 

@@ -74,7 +74,6 @@ int db_match_name(DBnode* node, const char* name);
 void* dbnode_search(void* head, const char* name);
 Table* db_get_table(DBnode* db, char* tablename);
 void db_add_table(DBnode* db, Table* t);
-void db_head_print(void);
 void db_print(DBnode* dbh);
 
 void table_print(DBnode* db);

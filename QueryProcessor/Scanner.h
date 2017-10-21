@@ -1,8 +1,9 @@
 #ifndef _SCANNER_H
 #define _SCANNER_H
 #include<stdint.h>
-#include "Listhead.h"
-#include "SourceStream.h"
+#include "../BaseStruct/Listhead.h"
+#include "../Client.h"
+
 #define TOKEN_TYPE (*curr)->token_type
 #define NEXT_TOKEN LIST_MOVE_NEXT(curr) 
 #define NEXT_TOKEN_TYPE ((Token*)LIST_GET_NEXT(*curr))->token_type
