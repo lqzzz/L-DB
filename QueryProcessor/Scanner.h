@@ -2,8 +2,6 @@
 #define _SCANNER_H
 #include<stdint.h>
 #include "../BaseStruct/Listhead.h"
-#include "../Client.h"
-
 #define TOKEN_TYPE (*curr)->token_type
 #define NEXT_TOKEN LIST_MOVE_NEXT(curr) 
 #define NEXT_TOKEN_TYPE ((Token*)LIST_GET_NEXT(*curr))->token_type
@@ -14,8 +12,8 @@ fprintf(stderr, " %d ÐÐ, %d ÁÐ ´íÎó£º%s\n", (*curr)->l_num, (*curr)->c_num, buf)
 typedef struct {
 	Listhead list_head;
 	enum Tokentype token_type;
-	uint16_t c_num;
-	uint16_t l_num;
+	int c_num;
+	int l_num;
 	void *value_;
 }Token;
 void init_key_word();

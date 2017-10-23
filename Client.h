@@ -6,7 +6,6 @@
 #define DATASET 1;
 
 typedef struct {
-	size_t type;
 	char* buf;
 	int c_num;
 	int l_num;
@@ -17,6 +16,7 @@ typedef struct {
 	size_t eindex;
 	StreamBuff* recvbuf;
 	StreamBuff* sendbuf;
+
 }Client;
 
 void process_command(Client* c);
