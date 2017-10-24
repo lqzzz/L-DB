@@ -5,7 +5,9 @@
 #define LIST_GET_NEXT(head) ((Listhead*)head)->next_
 #define LIST_GET_PRVE(head) ((Listhead*)head)->prve_
 #define LIST_MOVE_NEXT(head) *(head) = ((Listhead*)*(head))->next_
+
 #define LIST_ENTRY(ptr,type,member) ((type *)((char *)(ptr)-(unsigned long)(&((type *)0)->member)))  
+
 #define LIST_ADD_TAIL(head,newnode)do{\
 	(newnode)->prve_ = (head)->prve_;\
 	(newnode)->next_ = head;\

@@ -2,7 +2,6 @@
 #include"../BaseStruct/dict.h"
 #include <stdio.h>
 
-
 static void dict_print_arr(Dict* d) {
 	printf("hasharray : ");
 	for (size_t i = 0; i < d->ht_.size_; i++){

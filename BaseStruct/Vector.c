@@ -178,14 +178,17 @@ void quicksort(Vector* vsrc, int l, int u) {
 	quicksort(vsrc, m + 1, u);
 }
 
-void vector_sort(Vector * v){
+void vector_sort(Vector* v){
 	quicksort(v, 0, v->usedsize_ - 1);
 }
 
-void* vector_search(Vector * v,void* key,int32_t(*comp)(void*, void*)){
+void* vector_search(Vector* v,void* key,int32_t(*comp)(void*, void*)){
+	if (v->usedsize_ == 0)
+		return NULL;
 	if (comp == NULL)
 		comp = default_comp;
-	return v->usedsize_ >= BINARY_SEARCH_FLAG ? binary_search(v, key, comp) 
+	return v->usedsize_ >= BINARY_SEARCH_FLAG ? 
+		binary_search(v, key, comp) 
 		: linear_search(v, key, comp);
 }
 

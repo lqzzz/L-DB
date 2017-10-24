@@ -1,6 +1,6 @@
 #ifndef _TOKENIZER_H
 #define _TOKENIZER_H
 #include "../Catalog.h"
-int sql_parse(Arena* arena, DBnode *dbnode, Srcstream* stream);
+int sql_parse(char* errmsg,DBnode *dbnode, Token* tokenhead);
 #endif // !_TOKENIZER_H
  

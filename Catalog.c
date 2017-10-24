@@ -11,7 +11,7 @@ void* dbnode_search(void* head,const char* name){
 	return list_search(head, name, db_match_name);
 }
 
-Table * db_get_table(DBnode * db, char * tablename){
+Table* db_get_table(DBnode * db, char * tablename){
 	return vector_search(&db->tables, tablename, table_cmp_name);
 }
 
@@ -26,7 +26,6 @@ DBnode* database_create(char* name,size_t id,size_t tablecount){
 	dbnode->id_ = id;
 	dbnode->table_count = tablecount;
 	LIST_INIT(dbnode);
-
 	return dbnode;
 }
 
@@ -78,7 +77,7 @@ size_t get_max_data_len(void * item, enum Tokentype datatype,size_t currmaxlen) 
 			max_len = item_len;
 	}
 			  break;
-	case REAL: {
+	case FLOAT: {
 		int num_ = *(float*)(item);
 		while (num_ != 0) {
 			num_ = num_ / 10;

@@ -66,16 +66,14 @@ int32_t check_con(DBnode * db,struct con * con,Vector* vfrom){
 	if (con == NULL)
 		return 0;
 	if (check_con(db, con->left_con, vfrom) == -1)
-		goto ERROR;
+		return -1;
 	if (check_con(db, con->right_con, vfrom) == -1)
-		goto ERROR;
+		return -1;
 	if (check_schema(db, con->left_opand, vfrom) == -1)
-		goto ERROR;
+		return -1;
 	if (check_schema(db, con->right_opand, vfrom) == -1)
-		goto ERROR;
+		return -1;
 	return 0;
-ERROR:
-	return -1;
 }
 
 static __inline int32_t get_base_exp(DBnode* db,Pair* p, Token** curr) {

@@ -15,8 +15,8 @@ void page_test(void);
 void meta_test(void);
 
 int main(void) {
-	//dict_test();
-	//page_test();
+	dict_test();
+	page_test();
 	meta_test();
 	printf("%d/%d (%3.2f%%) passed\n", test_pass, test_count, test_pass * 100.0 / test_count);
 }

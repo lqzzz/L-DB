@@ -67,8 +67,8 @@ typedef struct VectorIter{
 	v_->vector_ = memset(v_->vector_ + v_used_size, 0, v_->freesize_ * sizeof(size_t));\
 }while(0)
 
-#define VECTOR_INIT(v) memset(v,0,sizeof(Vector))
-#define VECTOR_INIT_LEN(v,len) VECTOR_INIT(v); VECTOR_GROW((v),len)
+#define VECTOR_INIT(v) memset(v,0,sizeof(Vector)); VECTOR_GROW((v),V_INIT_LEN)
+#define VECTOR_INIT_LEN(v,len) memset(v,0,sizeof(Vector)); VECTOR_GROW((v),len)
 
 #define VECTOR_HAS_ELEM(v) (v)->usedsize_ ? 1:0
 #define VECTOR_GET_SIZE(v) (v)->usedsize_

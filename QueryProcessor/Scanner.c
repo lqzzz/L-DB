@@ -1,18 +1,14 @@
 #include "Scanner.h"
-//#include "Pair.h"
 #include "../Catalog.h"
 #include "../BaseStruct/dict.h"
 #include <stdio.h>
-#define SCANNER_ERROR(buf) do{\
-fprintf(stderr, " %d 行, %d 列 错误：%s\n", *l_num, *c_num, buf); goto ERROR;\
-}while(0)
 
 static Dict *dict;//关键字表
 
-int char_type(char);
-Token* token_new(const char*, int, int, int);
+static int char_type(char);
+static Token* token_new(char* value, int cnum, int lnum, int tokentype);
 
-static int char_type(char ch) {
+int char_type(char ch) {
 	if (ch >= 'a'&&ch <= 'z' ||
 		ch >= 'A'&&ch <= 'Z' ||
 		ch == '_')
@@ -25,18 +21,18 @@ static int char_type(char ch) {
 		return SYMBOL;
 }
 
-static Token* token_new(const char* value, int cnum, int lnum, int tokentype) {
+Token* token_new(char* value, int cnum, int lnum, int tokentype) {
 	Token* token_;
 	token_ = mem_alloc(sizeof(Token));
 	token_->c_num = cnum;
 	token_->l_num = lnum;
 	token_->token_type = tokentype;
-	LIST_INIT(token_);
+	LIST_INIT(&token_->list_head);
 	token_->value_ = value;
 	return token_;
 }
 
-static Token* scanner(char** ptrsqlstr,int* c_num,int* l_num) {
+static Token* get_next_token(char* errmsg,char** ptrsqlstr,int* c_num,int* l_num) {
 	char** src_ = ptrsqlstr;
 	char *p = *src_;
 	char ch;
@@ -111,7 +107,7 @@ static Token* scanner(char** ptrsqlstr,int* c_num,int* l_num) {
 				case '*': return token_new(NULL, *c_num, *l_num, STAR);
 				case '!':
 					if (*(*src_)++ != '=') {
-						fprintf(stderr, " %d 行, %d 列 错误：%s\n", *l_num, *c_num, "缺少 '=' ");
+						sprintf(errmsg, " %d 行, %d 列 错误：%s\n", *l_num, *c_num, "缺少 '=' ");
 						break;
 					}
 					return token_new(NULL, *c_num, *l_num, NOT_EQUAL);
@@ -136,8 +132,7 @@ static Token* scanner(char** ptrsqlstr,int* c_num,int* l_num) {
 			if (token_type = dict_get_value(dict, token_str)) {
 				token_ = token_new(NULL, *c_num, *l_num, token_type);
 				mem_free(token_str);
-			}
-			else
+			}else
 				token_ = token_new(token_str, *c_num, *l_num, type);
 			return token_;
 		}
@@ -150,21 +145,20 @@ void token_del(Token* token){
 	mem_free(token);
 }
 
+Token* scanner(char* errmsg,char ** ptrsqlstr, int * c_num, int * l_num){
+	Token* token_head;
+	if ((token_head = get_next_token(errmsg, ptrsqlstr, c_num, l_num)) == NULL) {
+		sprintf(errmsg, "%s", "空sql字符串\n");
+		return NULL;
+	}
+	for (Token *token_next = get_next_token(errmsg,ptrsqlstr,c_num,l_num), *head = &token_head->list_head;
+		token_next; token_next = get_next_token(errmsg,ptrsqlstr,c_num,l_num)) 
 
-//Token* get_next_token(Srcstream* stream) {
-//	char ch;
-//	while (ch = **src_)
-//		if (ch == ' ' || ch == ';') {
-//			(*src_)++;
-//			(*c_num)++;
-//		}
-//		else if (ch == '\n') {
-//			(*l_num)++;
-//			(*src_)++;
-//		}
-//		else return scanner(stream);
-//		return NULL;
-//}
+		LIST_ADD_TAIL(&head->list_head, &token_next->list_head);
+	return token_head;
+}
+
+
 
 void move_value(void** src, void** dest){
 	*dest = *src;
@@ -176,23 +170,19 @@ void init_key_word() {
 	dict_type->key_match = strcmp;
 	dict_type->key_dup = NULL;
 	dict_type->value_dup = NULL;
-	dict = dict_create(dict_type);
+	dict = new_dict_len(dict_type,35);
 
 	dict_add_entry(dict, "database", DATABASE);
 	dict_add_entry(dict, "use", USE);
-
 	dict_add_entry(dict, "create", CREATE);
 	dict_add_entry(dict, "table", TABLE);
 	dict_add_entry(dict, "index", INDEX);
-
 	dict_add_entry(dict, "char", CHAR);
 	dict_add_entry(dict, "int", INT);
 	dict_add_entry(dict, "float", FLOAT);
-
 	dict_add_entry(dict, "primary", PRIMARY);
 	dict_add_entry(dict, "key", KEY);
 	dict_add_entry(dict, "update", UPDATE);
-
 	dict_add_entry(dict, "select", SELECT);
 	dict_add_entry(dict, "where", WHERE);
 	dict_add_entry(dict, "or", OR);
@@ -204,14 +194,9 @@ void init_key_word() {
 	dict_add_entry(dict, "order", ORDER);
 	dict_add_entry(dict, "having", HAVING);
 	dict_add_entry(dict, "distinct", DISTINCT);
-
-	dict_add_entry(dict, "alter", ALTER);
-	dict_add_entry(dict, "add", ADD);
-	dict_add_entry(dict, "drop", DROP);
-	dict_add_entry(dict, "commit", COMMIT);
-	dict_add_entry(dict, "transaction", TRANSACTION);
 	dict_add_entry(dict, "unique", UNIQUE);
-
+	dict_add_entry(dict, "NOT", NOT);
+	dict_add_entry(dict, "NULL", NULL_);
 	dict_add_entry(dict, "insert", INSERT);
 	dict_add_entry(dict, "into", INTO);
 	dict_add_entry(dict, "values", VALUES);
@@ -220,13 +205,10 @@ void init_key_word() {
 	dict_add_entry(dict, "as", AS);
 	dict_add_entry(dict, "delete", DELETE);
 	dict_add_entry(dict, "union", UNION);
-	dict_add_entry(dict, "rollback", ROLLBACK);
-
 	dict_add_entry(dict, "avg", AVG);
 	dict_add_entry(dict, "max", MAX);
 	dict_add_entry(dict, "min", MIN);
-
-	dict_add_entry(dict, ">", GREATERTHAN);
-	dict_add_entry(dict, "<", LESSTHAN);
-	dict_add_entry(dict, "=", EQUAL);
+	//dict_add_entry(dict, ">", GREATERTHAN);
+	//dict_add_entry(dict, "<", LESSTHAN);
+	//dict_add_entry(dict, "=", EQUAL);
 }
