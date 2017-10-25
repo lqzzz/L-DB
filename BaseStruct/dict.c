@@ -1,6 +1,8 @@
 #include "dict.h"
 #include<stdio.h>
 
+#define DICT_EQ 0
+
 static unsigned long dict_next_power(unsigned long size);
 static void dict_init(Dict* d,DictType* dicttype);
 static int dict_expand_ifneeded(Dict *d);
@@ -14,6 +16,7 @@ int dict_expand_ifneeded(Dict *d) {
 		return dict_expand(d, DICT_HT_INITIAL_SIZE);
 	if (d->ht_.used_ > d->ht_.size_ && d->ht_.used_ / d->ht_.size_ >= 2)
 		return dict_expand(d, d->ht_.size_ * 2);
+	return DICT_OK;
 }
 
 unsigned long dict_next_power(unsigned long size) {
@@ -99,7 +102,7 @@ DictEntry** dict_get_entry(const Dict *dict, const void *key){
 	int index_ = DictHashKey(dict,key) % dict->ht_.size_;
 	DictEntry **curr_ = &dict->ht_.table_[index_];
 	while (*curr_) {
-		if (DictMatchHashKey(dict, (*curr_)->key_, key)) 
+		if (DictMatchHashKey(dict, (*curr_)->key_, key) == DICT_EQ)
 			break;
 		curr_ = &(*curr_)->next_;
 	}
@@ -156,8 +159,10 @@ int dict_expand(Dict * d, unsigned long size){
 
 int dict_add_entry(Dict* dict,void* key,void* value){
 	DictEntry **ptr_ = dict_get_entry(dict,key);
-	if (*ptr_)
+	if (*ptr_) {
+		printf(" %s ≤Â»Î ß∞‹\n", key);
 		return DICT_ERR;
+	}
 	DictEntry *entry_ = mem_alloc(sizeof(DictEntry));
 	DictSetHashKey(dict, entry_, key);
 	DictSetHashValue(dict, entry_,value);

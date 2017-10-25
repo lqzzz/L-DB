@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 static Dict *dict;//关键字表
-
+static DictType dtype = { NULL,NULL,strcmp,NULL,NULL,dict_str_hashfunction };
 static int char_type(char);
 static Token* token_new(char* value, int cnum, int lnum, int tokentype);
 
@@ -34,20 +34,23 @@ Token* token_new(char* value, int cnum, int lnum, int tokentype) {
 
 static Token* get_next_token(char* errmsg,char** ptrsqlstr,int* c_num,int* l_num) {
 	char** src_ = ptrsqlstr;
-	char *p = *src_;
+	char* p = *src_;
+	//char* checkp = p;
 	char ch;
 	while (ch = *p) {
 		if (ch == ' ' || ch == ';') {
 			(*src_)++;
+			p++;
 			(*c_num)++;
-		}
-		else if (ch == '\n') {
+
+		}else if (ch == '\n') {
 			(*l_num)++;
+			p++;
 			(*src_)++;
 		}else {
 			size_t len_ = 0;
-			int type;
-			switch (type = char_type(ch))
+			int chartype;
+			switch (chartype = char_type(ch))
 			{
 			case ID:
 				while (ch >= 'a' && ch <= 'z' ||
@@ -97,43 +100,59 @@ static Token* get_next_token(char* errmsg,char** ptrsqlstr,int* c_num,int* l_num
 				break;
 			default:
 				++*src_;
+				int token_type;
 				switch (ch) {
-				case '(': return token_new(NULL, *c_num, *l_num, LB);
-				case ')': return token_new(NULL, *c_num, *l_num, RB);
-				case ',': return token_new(NULL, *c_num, *l_num, COMMA);
-				case ';': return token_new(NULL, *c_num, *l_num, SEM);
-				case '.': return token_new(NULL, *c_num, *l_num, DOT);
-				case '=': return token_new(NULL, *c_num, *l_num, EQUAL);
-				case '*': return token_new(NULL, *c_num, *l_num, STAR);
+				case '(': 
+					token_type = LB; 
+					break;
+				case ')': token_type = RB; break;
+				case ',': token_type = COMMA; break;
+				case ';': token_type = SEM; break;
+				case '.': token_type = DOT; break; 
+				case '=': token_type = EQUAL; break; 
+				case '*': token_type = STAR; break;
 				case '!':
 					if (*(*src_)++ != '=') {
 						sprintf(errmsg, " %d 行, %d 列 错误：%s\n", *l_num, *c_num, "缺少 '=' ");
 						break;
 					}
-					return token_new(NULL, *c_num, *l_num, NOT_EQUAL);
+					token_type = NOT_EQUAL;
 				case '>':
 					if (*(*src_)++ != '=') //*(*src_++) 
-						return token_new(NULL, *c_num, *l_num, GREATERTHAN);
-					return token_new(NULL, *c_num, *l_num, GREATER_OR_EQ);
+						token_type = GREATERTHAN;
+					token_type = GREATER_OR_EQ;
 				case '<':
 					if (*(*src_)++ != '=')
-						return token_new(NULL, *c_num, *l_num, LESSTHAN);
-					return token_new(NULL, *c_num, *l_num, LESS_OR_EQ);
+						token_type = LESSTHAN;
+					token_type = LESS_OR_EQ;
 				default: 
+						sprintf(errmsg, " %d 行, %d 列 错误\n", *l_num, *c_num);
 					break;
 				}
+
+				return token_new(NULL, *c_num, *l_num, token_type);
+
 			}
-			char *token_str = mem_alloc(len_ + 1);
-			for (size_t i = 0; i < len_; ++i) *token_str++ = *p++;
-			*token_str = '\0';
-			token_str -= len_;
+
+			char* endchar = p + len_;
+			char cpychar = *endchar;
+			*endchar = '\0';
+
+			//char *token_str = mem_alloc(len_ + 1);
+			//for (size_t i = 0; i < len_; ++i) *token_str++ = *p++;
+			//*token_str = '\0';
+			//token_str -= len_;
 			int token_type;
 			Token *token_ = NULL;
-			if (token_type = dict_get_value(dict, token_str)) {
+			if (token_type = dict_get_value(dict, p)) {
 				token_ = token_new(NULL, *c_num, *l_num, token_type);
-				mem_free(token_str);
-			}else
-				token_ = token_new(token_str, *c_num, *l_num, type);
+				//mem_free(token_str);
+			}else {
+				char *token_str = mem_alloc(len_ + 1);
+				memcpy(token_str, p, len_ + 1);
+				token_ = token_new(token_str, *c_num, *l_num, chartype);
+			}
+			*endchar = cpychar;
 			return token_;
 		}
 	}
@@ -165,12 +184,13 @@ void move_value(void** src, void** dest){
 	*src = NULL;
 }
 
-void init_key_word() { 
-	DictType* dict_type = mem_alloc(sizeof(DictType));
-	dict_type->key_match = strcmp;
-	dict_type->key_dup = NULL;
-	dict_type->value_dup = NULL;
-	dict = new_dict_len(dict_type,35);
+//void token_print(Token * t){
+//	printf()
+//}
+
+void init_key_word(void) { 
+
+	dict = new_dict_len(&dtype,35);
 
 	dict_add_entry(dict, "database", DATABASE);
 	dict_add_entry(dict, "use", USE);

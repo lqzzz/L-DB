@@ -21,5 +21,6 @@ void init_key_word();
 void token_del(Token* token);
 Token* scanner(char* errmsg, char** pcommandstr, int* c_num, int* l_num);
 void move_value(void** src, void** dest);
+//void token_print(Token* t);
 
 #endif // !_SCANNER_H

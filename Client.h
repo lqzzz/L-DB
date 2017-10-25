@@ -10,6 +10,7 @@ typedef struct {
 	Listhead head;
 	size_t eindex;
 	char* command_str;
+	char* command_iter;
 	int comm_cnum;
 	int comm_lnum;
 	Token* token_head;

@@ -12,6 +12,7 @@ typedef struct {
 	char dbname[NAME_LEN];
 	size_t table_count;
 }DatabaseInfo;
+static DBnode* dbhead = NULL;
 
 static DBnode sys_database;
 
@@ -70,14 +71,16 @@ int read_database_info(void) {
 			DBnode *next_ = database_create(info.dbname, 
 				info.db_num, info.table_count);
 			new_bufferManager(next_);
-			LIST_ADD_TAIL(&sys_database.list_head, &next_->list_head);
+			if (dbhead == NULL)
+				dbhead = next_;
+			else LIST_ADD_TAIL(&dbhead->list_head, &next_->list_head);
 		}
 		fclose(fd);
 		return db_count;
 	}
 }
 
-int read_table_info() {
+int read_table_info(void) {
 	FILE* fd;
 	fd = fopen("TableInfo.df", "a");
 	fclose(fd);
@@ -111,7 +114,7 @@ int read_table_info() {
 	}
 }
 
-int read_column_info() {
+int read_column_info(void) {
 	FILE* fd;
 	fd = fopen("ColumnInfo.df", "a");
 	fclose(fd);
@@ -133,7 +136,7 @@ int read_column_info() {
 			Column* col_ = new_column(NULL, NULL, NULL, NULL, 0, 0);
 			fread(&col_, sizeof(ColumnInfo), 1, fd);
 
-			DBnode* db_ = DBNODE_SEARCH(&sys_database, col_->column_db_name);
+			DBnode* db_ = DBNODE_SEARCH(dbhead, col_->column_db_name);
 
 			Table* table_ = db_get_table(db_, col_->column_table_name);
 
@@ -215,69 +218,70 @@ int table_info_update(Table * table){
 
 DBnode* init_sys_data() {
 
-	//初始化数据库信息表
-	sys_database.id_ = 0;
-	sys_database.table_count = 0;
-	LIST_INIT(&sys_database.list_head);
-	strcpy(sys_database.name_, "Sys_database");
-	VECTOR_INIT_LEN(&sys_database.tables, 4);
+	////初始化数据库信息表
+	//sys_database.id_ = 0;
+	//sys_database.table_count = 0;
+	//LIST_INIT(&sys_database.list_head);
+	//strcpy(sys_database.name_, "Sys_database");
+	//VECTOR_INIT_LEN(&sys_database.tables, 4);
 
-	db_add_table(&sys_database, &sys_database_info);
-	db_add_table(&sys_database, &sys_table_info);
-	db_add_table(&sys_database, &sys_column_info);
+	//db_add_table(&sys_database, &sys_database_info);
+	//db_add_table(&sys_database, &sys_table_info);
+	//db_add_table(&sys_database, &sys_column_info);
 
-	table_init(&sys_database_info, "DataBaseInfo", 0, sizeof(DatabaseInfo), 0, 0, 0);
-	table_add_col(&sys_database_info, &database_id);
-	table_add_col(&sys_database_info, &database_name);
-	table_add_col(&sys_database_info, &database_table_count);
+	//table_init(&sys_database_info, "DataBaseInfo", 0, sizeof(DatabaseInfo), 0, 0, 0);
+	//table_add_col(&sys_database_info, &database_id);
+	//table_add_col(&sys_database_info, &database_name);
+	//table_add_col(&sys_database_info, &database_table_count);
 
-	col_set_info(&database_id, 0, INT, 1, 1, 0, 0, 0,0, "DataBaseId", "DataBaseInfo", "Sys_database");
-	col_set_info(&database_name, 1, CHAR, 1, 1, 0, 0, 0,0, "DataBaseId", "DataBaseInfo", "Sys_database");
-	col_set_info(&database_table_count, 2, INT, 1, 1, 0, 0, 0,0, "DataBaseId", "DataBaseInfo", "Sys_database");
+	//col_set_info(&database_id, 0, INT, 1, 1, 0, 0, 0,0, "DataBaseId", "DataBaseInfo", "Sys_database");
+	//col_set_info(&database_name, 1, CHAR, 1, 1, 0, 0, 0,0, "DataBaseId", "DataBaseInfo", "Sys_database");
+	//col_set_info(&database_table_count, 2, INT, 1, 1, 0, 0, 0,0, "DataBaseId", "DataBaseInfo", "Sys_database");
 
-	//初始化表信息表
-	table_init(&sys_table_info, "TableInfo", 1, sizeof(TableInfo), 0, 0, 0);
-	col_set_info(&table_num, 0, INT, 0, 0, 0, 0, "TableId", "TableInfo", "Sys_database");
-	col_set_info(&table_name, 1, CHAR, 0, 0, 0, 0, "TableName", "TableInfo", "Sys_database");
-	col_set_info(&table_auto_increment, 2, INT, 0, 0, 0, 0, "TableAutoIncrement", "TableInfo", "Sys_database");
-	col_set_info(&table_rec_size, 3, INT, 0, 0, 0, 0, "TableRecSize", "TableInfo", "Sys_database");
-	col_set_info(&table_data_len, 4, INT, 0, 0, 0, 0, "TableData_Len", "TableInfo", "Sys_database");
-	col_set_info(&table_col_count, 5, INT, 0, 0, 0, 0, "TableColCount", "TableInfo", "Sys_database");
-	col_set_info(&table_db_name, 6, CHAR, 0, 0, 0, 0, "TableDbName", "TableInfo", "Sys_database");
-	col_set_info(&table_page_slot_count, 7, INT, 0, 0, 0, 0, "TablePageSlotCount", "TableInfo", "Sys_database");
-	table_add_col(&sys_table_info, &table_num);
-	table_add_col(&sys_table_info, &table_name);
-	table_add_col(&sys_table_info, &table_auto_increment);
-	table_add_col(&sys_table_info, &table_rec_size);
-	table_add_col(&sys_table_info, &table_data_len);
-	table_add_col(&sys_table_info, &table_col_count);
-	table_add_col(&sys_table_info, &table_db_name);
-	table_add_col(&sys_table_info, &table_page_slot_count);
+	////初始化表信息表
+	//table_init(&sys_table_info, "TableInfo", 1, sizeof(TableInfo), 0, 0, 0);
+	//col_set_info(&table_num, 0, INT, 0, 0, 0, 0, "TableId", "TableInfo", "Sys_database");
+	//col_set_info(&table_name, 1, CHAR, 0, 0, 0, 0, "TableName", "TableInfo", "Sys_database");
+	//col_set_info(&table_auto_increment, 2, INT, 0, 0, 0, 0, "TableAutoIncrement", "TableInfo", "Sys_database");
+	//col_set_info(&table_rec_size, 3, INT, 0, 0, 0, 0, "TableRecSize", "TableInfo", "Sys_database");
+	//col_set_info(&table_data_len, 4, INT, 0, 0, 0, 0, "TableData_Len", "TableInfo", "Sys_database");
+	//col_set_info(&table_col_count, 5, INT, 0, 0, 0, 0, "TableColCount", "TableInfo", "Sys_database");
+	//col_set_info(&table_db_name, 6, CHAR, 0, 0, 0, 0, "TableDbName", "TableInfo", "Sys_database");
+	//col_set_info(&table_page_slot_count, 7, INT, 0, 0, 0, 0, "TablePageSlotCount", "TableInfo", "Sys_database");
+	//table_add_col(&sys_table_info, &table_num);
+	//table_add_col(&sys_table_info, &table_name);
+	//table_add_col(&sys_table_info, &table_auto_increment);
+	//table_add_col(&sys_table_info, &table_rec_size);
+	//table_add_col(&sys_table_info, &table_data_len);
+	//table_add_col(&sys_table_info, &table_col_count);
+	//table_add_col(&sys_table_info, &table_db_name);
+	//table_add_col(&sys_table_info, &table_page_slot_count);
 
-	//初始化列信息表
-	table_init(&sys_column_info, "ColumnInfo", 2, sizeof(ColumnInfo), 0, 0, 0);
-	col_set_info(&column_num, 0, INT, 0, 0, 0,0, "ColumnId", "ColumnInfo", "Sys_database");
-	col_set_info(&column_name, 1, CHAR, 0, 0, 0, 0, "ColumnName", "ColumnInfo", "Sys_database");
-	col_set_info(&column_data_type, 2, CHAR, 0, 0, 0, 0, "ColumnDataType", "ColumnInfo", "Sys_database");
-	col_set_info(&column_not_null, 3, INT, 0, 0, 0, 0, "ColumnNotNull", "ColumnInfo", "Sys_database");
-	col_set_info(&column_unique, 4, INT, 0, 0, 0, 0, "ColumnUnique", "ColumnInfo", "Sys_database");
-	col_set_info(&column_rec_offset, 5, INT, 0, 0, 0, 0, "ColumnRecOffset", "ColumnInfo", "Sys_database");
-	col_set_info(&column_table_name, 6, CHAR, 0, 0, 0, 0, "ColumnTableName", "ColumnInfo", "Sys_database");
-	col_set_info(&column_database_name, 7, CHAR, 0, 0, 0, 0, "ColumnDatabaseName", "ColumnInfo", "Sys_database");
-	table_add_col(&sys_column_info, &column_num);
-	table_add_col(&sys_column_info, &column_name);
-	table_add_col(&sys_column_info, &column_data_type);
-	table_add_col(&sys_column_info, &column_not_null);
-	table_add_col(&sys_column_info, &column_unique);
-	table_add_col(&sys_column_info, &column_rec_offset);
-	table_add_col(&sys_column_info, &column_table_name);
-	table_add_col(&sys_column_info, &column_database_name);
+	////初始化列信息表
+	//table_init(&sys_column_info, "ColumnInfo", 2, sizeof(ColumnInfo), 0, 0, 0);
+	//col_set_info(&column_num, 0, INT, 0, 0, 0,0, "ColumnId", "ColumnInfo", "Sys_database");
+	//col_set_info(&column_name, 1, CHAR, 0, 0, 0, 0, "ColumnName", "ColumnInfo", "Sys_database");
+	//col_set_info(&column_data_type, 2, CHAR, 0, 0, 0, 0, "ColumnDataType", "ColumnInfo", "Sys_database");
+	//col_set_info(&column_not_null, 3, INT, 0, 0, 0, 0, "ColumnNotNull", "ColumnInfo", "Sys_database");
+	//col_set_info(&column_unique, 4, INT, 0, 0, 0, 0, "ColumnUnique", "ColumnInfo", "Sys_database");
+	//col_set_info(&column_rec_offset, 5, INT, 0, 0, 0, 0, "ColumnRecOffset", "ColumnInfo", "Sys_database");
+	//col_set_info(&column_table_name, 6, CHAR, 0, 0, 0, 0, "ColumnTableName", "ColumnInfo", "Sys_database");
+	//col_set_info(&column_database_name, 7, CHAR, 0, 0, 0, 0, "ColumnDatabaseName", "ColumnInfo", "Sys_database");
+	//table_add_col(&sys_column_info, &column_num);
+	//table_add_col(&sys_column_info, &column_name);
+	//table_add_col(&sys_column_info, &column_data_type);
+	//table_add_col(&sys_column_info, &column_not_null);
+	//table_add_col(&sys_column_info, &column_unique);
+	//table_add_col(&sys_column_info, &column_rec_offset);
+	//table_add_col(&sys_column_info, &column_table_name);
+	//table_add_col(&sys_column_info, &column_database_name);
 
-	read_database_info();
-	read_table_info();
-	read_column_info();
+	if (read_database_info() != 0) {
+		read_table_info();
+		read_column_info();
+	}
 
-	return &sys_database;
+	return dbhead;
 }
 
 void db_show(char * name){

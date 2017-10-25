@@ -2,6 +2,8 @@
 #include"../Meta.h"
 #include"TestFrameWork.h"
 
+static DBnode* dbhead;
+
 static DBnode* sysdb;
 static DBnode* db1;
 static DBnode* db2;
@@ -18,8 +20,14 @@ static Column* col6;
 static Column* col7;
 static Column* col8;
 
+int database_info_update(DBnode * db);
+int col_info_update(Column * col);
+int table_info_update(Table * table);
+
 static void meta_test_init(void) {
+
 	//sysdb = init_sys_data();
+
 	db1 = database_create("T_1", 0, 0);
 	db2 = database_create("T_2", 1, 0);
 	LIST_ADD_TAIL(&db1->list_head, &db2->list_head);
@@ -73,8 +81,19 @@ static void add_test(void) {
 	EXPECT_EQ_INT(4, col8->column_rec_offset);
 }
 
+static void read_test(void) {
+	dbhead = init_sys_data();
+	EXPECT_EQ_INT(NULL, dbhead);
+	database_info_update(db1);
+	dbhead = init_sys_data();
+	EXPECT_EQ_INT(0, dbhead->id_);
+}
+
 void meta_test(void) {
 	meta_test_init();
-	add_test();
-	db_print(db1);
+	//add_test();
+	//db_print(db1);
+	read_test();
+	//remove(fh->filename_);
+
 }

@@ -90,7 +90,7 @@ static void dict_test_del(Dict* d) {
 }
 
 void dict_test(void) {
-	DictType type = { NULL,NULL,test_strcmp,NULL,
+	DictType type = { NULL,NULL,strcmp,NULL,
 					  NULL,dict_str_hashfunction };
 	Dict* d = new_dict(&type);
 	dict_test_add(d);

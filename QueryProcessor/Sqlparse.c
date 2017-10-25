@@ -19,8 +19,8 @@ static int parse_create(char* errmsg,DBnode* dbnode, Token** curr);
 static Table* parse_create_table(char* errmsg,DBnode *dbnode,Token** token);
 static int parse_create_column(char* errmsg,Table* t,Token** token);
 static int parse_datatype(char* errmsg,int datatype, Token**);
-static int parse_insert(char* errmsg, DBnode*, Token**);
-static int parse_insert_values(char* errmsg, DBnode*, Table*, Vector*, Token**);
+//static int parse_insert(char* errmsg, DBnode*, Token**);
+//static int parse_insert_values(char* errmsg, DBnode*, Table*, Vector*, Token**);
 
 //int parse_insert_values(char* errmsg,DBnode* db,Table* table,Vector* collist,Token** curr) {
 //	if (TOKEN_TYPE != LB) PARSE_ERROR("缺少 （ ");
@@ -86,47 +86,47 @@ static int parse_insert_values(char* errmsg, DBnode*, Table*, Vector*, Token**);
 //	return -1;
 //}
 
-static int parse_insert(char* errmsg,DBnode* dbnode, Token** curr) {
-	Table* table_;
-	if ((table_ = db_get_table(dbnode, (*curr)->value_)) == NULL) 
-		PARSE_ERROR("无效表名");
-	Vector v_col;
-	VECTOR_INIT(&v_col);
-	switch (MOVE_NEXT_TOKEN_TYPE){
-	case LB:
-		if (MOVE_NEXT_TOKEN_TYPE != ID) PARSE_ERROR("缺少ID");
-		Column *col_;
-		for (;;) {
-			if ((col_ = table_get_col(table_, (*curr)->value_)) == NULL) 
-				PARSE_ERROR("无对应列名");
-			VECTOR_PUSHBACK(&v_col, col_);
-
-			switch (MOVE_NEXT_TOKEN_TYPE) {
-			case COMMA:
-				if (MOVE_NEXT_TOKEN_TYPE != ID) 
-					PARSE_ERROR("缺少ID");
-				break;
-			case RB:
-				if (MOVE_NEXT_TOKEN_TYPE != VALUES) 
-					PARSE_ERROR("缺少values");
-				NEXT_TOKEN;
-				if ((parse_insert_values(errmsg,dbnode,table_, &v_col, curr) == -1))
-					goto ERROR;
-				return 1;
-			default: 
-				PARSE_ERROR("无对应列名");
-			}
-		}
-	case VALUES:
-		//TODO
-		//if ((parse_insert_values(dbnode, table_, curr, fill_field_count)) == -1) goto ERROR;
-		return 0;
-	default:
-		PARSE_ERROR("缺少ID");
-	}
-ERROR:
-	return -1;
-}
+//static int parse_insert(char* errmsg,DBnode* dbnode, Token** curr) {
+//	Table* table_;
+//	if ((table_ = db_get_table(dbnode, (*curr)->value_)) == NULL) 
+//		PARSE_ERROR("无效表名");
+//	Vector v_col;
+//	VECTOR_INIT(&v_col);
+//	switch (MOVE_NEXT_TOKEN_TYPE){
+//	case LB:
+//		if (MOVE_NEXT_TOKEN_TYPE != ID) PARSE_ERROR("缺少ID");
+//		Column *col_;
+//		for (;;) {
+//			if ((col_ = table_get_col(table_, (*curr)->value_)) == NULL) 
+//				PARSE_ERROR("无对应列名");
+//			VECTOR_PUSHBACK(&v_col, col_);
+//
+//			switch (MOVE_NEXT_TOKEN_TYPE) {
+//			case COMMA:
+//				if (MOVE_NEXT_TOKEN_TYPE != ID) 
+//					PARSE_ERROR("缺少ID");
+//				break;
+//			case RB:
+//				if (MOVE_NEXT_TOKEN_TYPE != VALUES) 
+//					PARSE_ERROR("缺少values");
+//				NEXT_TOKEN;
+//				if ((parse_insert_values(errmsg,dbnode,table_, &v_col, curr) == -1))
+//					goto ERROR;
+//				return 1;
+//			default: 
+//				PARSE_ERROR("无对应列名");
+//			}
+//		}
+//	case VALUES:
+//		//TODO
+//		//if ((parse_insert_values(dbnode, table_, curr, fill_field_count)) == -1) goto ERROR;
+//		return 0;
+//	default:
+//		PARSE_ERROR("缺少ID");
+//	}
+//ERROR:
+//	return -1;
+//}
 
 Table* parse_create_table(char* errmsg,DBnode *dbnode, Token** curr) {
 	if (TOKEN_TYPE != ID) 
@@ -205,13 +205,13 @@ int sql_parse(char* errmsg,DBnode *db, Token* token_head) {
 			break;
 		case SELECT:
 			NEXT_TOKEN;
-			if (parse_select(dbnode, curr) == -1)
-				goto ERROR;
+			//if (parse_select(dbnode, curr) == -1)
+			//	goto ERROR;
 			break;
 		case INSERT:
 			if (MOVE_NEXT_TOKEN_TYPE != INTO) PARSE_ERROR("缺少INTO");
 			if (MOVE_NEXT_TOKEN_TYPE != ID) PARSE_ERROR("缺少ID");
-			if (parse_insert(errmsg,dbnode, curr) == -1) goto ERROR;
+			//if (parse_insert(errmsg,dbnode, curr) == -1) goto ERROR;
 			break;
 		default:
 			break;
@@ -245,34 +245,6 @@ int parse_datatype(char* errmsg,int datatype, Token** curr) {
 ERROR:
 	return SQL_ERROR;
 }
-
-
-//int parse_not(Column *col, Token** curr) {
-//	if (TOKEN_TYPE != NULL_) PARSE_ERROR("缺少NULL");
-//	col->is_null_able = 1;
-//	switch (MOVE_NEXT_TOKEN_TYPE) {
-//	case COMMA:
-//		NEXT_TOKEN;
-//		break;
-//	case RB:
-//		NEXT_TOKEN;
-//		return 1;
-//	case NOT:
-//		break;
-//	case PRIMARY:
-//		break;
-//	case FOREIGN:
-//		break;
-//	case DEFAULT:
-//		break;
-//	default:
-//		return 0;
-//		break;
-//	}
-//	return 2;
-//ERROR:
-//	return 0;
-//}
 
 int parse_create_column(char* errmsg,Table* t, Token** curr) {
 	char* table_name = t->t_info.table_name;

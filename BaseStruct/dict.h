@@ -67,7 +67,7 @@ typedef struct Dict {
 #define DictMatchHashKey(d,key_1,key_2)\
 	(((d)->type_&&((d)->type_->key_match)) ? \
 		(d)->type_->key_match(key_1,key_2) : \
-		(key_1 == key_2))
+		!(key_1 == key_2))
 
 Dict* new_dict(DictType *Type);
 Dict* new_dict_len(DictType *Type,unsigned int len);

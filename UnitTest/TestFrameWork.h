@@ -20,8 +20,8 @@ extern int test_pass;
     } while(0)
 
 #define EXPECT_EQ_INT(expect, actual) EXPECT_EQ_BASE((expect) == (actual), expect, actual, "%d")
-#define EXPECT_EQ_STR(expect, actual) EXPECT_EQ_BASE(test_strcmp((expect),(actual)), expect, actual, "%s")
+#define EXPECT_EQ_STR(expect, actual) EXPECT_EQ_BASE(strcmp((expect),(actual)) == 0 ? 1 : 0, expect, actual, "%s")
 
-int test_strcmp(const char* str1, const char* str2);
+//int test_strcmp(const char* str1, const char* str2);
 
 #endif // !__TESTFRAMEWORK_H
