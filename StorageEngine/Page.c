@@ -86,7 +86,7 @@ FHead* new_file_head(char* filename, FileHeadData* fhd){
 	FHead* fh = mem_alloc(sizeof(*fh));
 	//
 	fh->filename_ = filename;
-	fh->page_id_map = new_dict(&dt);
+	VECTOR_INIT_LEN(&fh->page_bit_map, PageCount);
 	fh->filehead = fhd;
 	fh->page_states = fhd->page_state_head;
 	return fh;

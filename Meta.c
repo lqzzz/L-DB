@@ -99,10 +99,10 @@ int read_table_info(void) {
 		fseek(fd, 0 - sizeof(char), SEEK_CUR);
 		fread(&table_count, sizeof(int), 1, fd);
 		for (int i = 0; i < table_count; i++) {
-			Table* t = new_table(NULL,NULL,NULL);
+			Table* t = new_table("", "", 0);
 			fread(&t->t_info, sizeof(TableInfo), 1, fd);
 			TableInfo *info = &t->t_info;
-			DBnode* db_ = DBNODE_SEARCH(&sys_database, info->table_db_name);
+			DBnode* db_ = DBNODE_SEARCH(dbhead, info->table_db_name);
 
 			bm_add_file_head(db_->id_,
 				read_file_head(info->table_name,
@@ -110,6 +110,7 @@ int read_table_info(void) {
 
 			db_add_table(db_, t);
 		}
+		fclose(fd);
 		return table_count;
 	}
 }
@@ -142,6 +143,7 @@ int read_column_info(void) {
 
 			table_add_col(table_, col_);
 		}
+		fclose(fd);
 		return column_count;
 	}
 }

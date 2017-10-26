@@ -84,9 +84,26 @@ static void add_test(void) {
 static void read_test(void) {
 	dbhead = init_sys_data();
 	EXPECT_EQ_INT(NULL, dbhead);
+
 	database_info_update(db1);
 	dbhead = init_sys_data();
 	EXPECT_EQ_INT(0, dbhead->id_);
+
+	table_info_update(t11);
+	table_info_update(t12);
+	table_info_update(t21);
+	table_info_update(t22);
+
+	col_info_update(col1);
+	col_info_update(col2);
+	col_info_update(col3);
+	col_info_update(col4);
+	col_info_update(col5);
+	col_info_update(col6);
+	col_info_update(col7);
+	col_info_update(col8);
+
+	db_print(dbhead);
 }
 
 void meta_test(void) {

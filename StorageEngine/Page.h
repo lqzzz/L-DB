@@ -1,10 +1,10 @@
 #ifndef PAGE_H
 #define PAGE_H
 #include<stdint.h>
-#include"../BaseStruct/Dict.h"
+#include"../BaseStruct/Vector.h"
 
 #define PageSize 1024 
-#define PageCount NAME_LEN
+#define PageCount 16 
 
 #define P_ERROR -1
 #define P_OK 0
@@ -37,7 +37,7 @@ typedef struct{
 
 typedef struct {
 	char* filename_;
-	Dict* page_id_map;
+	Vector page_bit_map;
 	char* page_states;
 	FileHeadData* filehead;
 }FHead;

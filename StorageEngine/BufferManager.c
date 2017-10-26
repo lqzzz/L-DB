@@ -9,6 +9,7 @@
 struct PageFrame{
 	int16_t is_dirty;
 	int32_t hot_;
+	Listhead PFlist_;
 	Page page_;
 };
 
