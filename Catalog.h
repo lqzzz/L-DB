@@ -25,12 +25,12 @@ enum Tokentype {
 };
 
 typedef struct {
-	size_t table_num;//2
+	size_t table_num;
 	size_t table_auto_increment;
-	size_t table_rec_size;//7
-	size_t table_data_len;//7
-	size_t table_col_count;//8
-	size_t table_page_solt_count;//
+	size_t table_rec_size;
+	size_t table_data_len;
+	size_t table_col_count;
+	size_t table_page_solt_count;
 	char table_db_name[NAME_LEN];
 	char table_name[NAME_LEN];
 }TableInfo;
@@ -56,6 +56,7 @@ typedef struct Record {
 typedef struct Table {
 	TableInfo t_info;
 	Vector cols;
+	Vector memrows;
 }Table;
 
 typedef struct DBnode {
@@ -86,7 +87,7 @@ void table_init(Table* table, char* name,
 	size_t id, size_t datalen,
 	size_t columncount,size_t recsize,
 	size_t pageslotcount);
-void table_print(Table* t);
+//void table_print(Table* t);
 
 Column* new_column(char* colname, char* tablename, char*dbname, size_t id,enum TokenType DT,size_t datalen);
 int col_cmp_name(Column* col1,Column* col2);

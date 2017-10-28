@@ -38,6 +38,7 @@ typedef struct{
 typedef struct {
 	char* filename_;
 	Vector page_bit_map;
+
 	char* page_states;
 	FileHeadData* filehead;
 }FHead;

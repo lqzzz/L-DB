@@ -2,7 +2,7 @@
 #include"../Mem/MemPool.h"
 #include"Page.h"
 
-static DictType dt = { NULL,NULL,NULL,NULL,NULL,dict_int_hashfunction };
+//static DictType dt = { NULL,NULL,NULL,NULL,NULL,dict_int_hashfunction };
 __inline int page_has_next(FHead* p, size_t index) {
 	return index == p->filehead->page_count ? P_ERROR : P_OK;
 }
@@ -120,7 +120,7 @@ int load_page(Page* page,int id,FHead* p){
 	fread(&page->pdata, PageSize, 1, fd_);
 
 	fclose(fd_);
-	dict_add_entry(p->page_id_map, page->pdata.page_id, page);
+	//dict_add_entry(p->page_id_map, page->pdata.page_id, page);
 	return 1;
 }
 
@@ -168,8 +168,8 @@ int next_page_id(FHead* p, size_t* index) {
 
 Page* file_get_page_by_id(FHead* f ,size_t pageid) {
 	Page* p;
-	if ((p = dict_get_value(f->page_id_map, pageid)))
-		return p;
+	//if ((p = dict_get_value(f->page_id_map, pageid)))
+	//	return p;
 	p = new_page(f->filehead->row_len, 
 		f->filehead->row_slot_count);
 	load_page(p, pageid, f);
@@ -201,7 +201,7 @@ void pagedata_init(PageData* pd){
 }
 
 void page_del(FHead* f, Page* p){
-	dict_del_entry_nofree(f->page_id_map, p->pdata.page_id);
+	//dict_del_entry_nofree(f->page_id_map, p->pdata.page_id);
 }
 
 char * page_get_row(Page * p, size_t index){

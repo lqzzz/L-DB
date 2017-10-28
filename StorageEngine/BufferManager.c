@@ -18,6 +18,7 @@ struct bm {
 	int DB_id;
 	Vector file_head_list;//<FHead>
 	Vector used_page_list;//<PageFram>
+	//FPtr lrulist;
 	//Vector other_page_list;
 };
 
