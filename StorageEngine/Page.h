@@ -40,6 +40,8 @@ typedef struct {
 	Vector page_bit_map;
 
 	char* page_states;
+	Vector* cols;
+	Vector rows;
 	FileHeadData* filehead;
 }FHead;
 
