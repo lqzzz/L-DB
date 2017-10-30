@@ -43,6 +43,7 @@ typedef struct {
 	Vector* cols;
 	Vector rows;
 	FileHeadData* filehead;
+	void* d;
 }FHead;
 
 FileHeadData* new_file_head_data(size_t pagecount,
