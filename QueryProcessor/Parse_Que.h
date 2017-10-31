@@ -2,14 +2,17 @@
 #define PARSE_QUE_H
 #include"Scanner.h"
 #include"../BaseStruct/Pair.h"
+#include"../BaseStruct/Vector.h"
 #include"../Catalog.h" 
 #include <stdio.h>
 typedef struct con {
-	enum Tokentype con_type; // WHERE SELECT JOIN
+	enum Tokentype con_type; // WHERE SELECT JOIN INSERT
 	struct con *right_con, *left_con;
 	enum Tokentype operator_; // and or not  eq ex...
 	Pair *left_opand, *right_opand;
 	struct con* next_;
+	Vector rows;
+	VectorIter iter;
 	//Relation* res_;
 }Logicplan;
 

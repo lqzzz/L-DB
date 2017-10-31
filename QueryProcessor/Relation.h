@@ -5,7 +5,6 @@
 #include"../StorageEngine/Page.h"
 
 typedef struct {
-
 	struct rehead{
 		Listhead head_;
 		Pair schema_name;

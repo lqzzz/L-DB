@@ -36,14 +36,12 @@ typedef struct{
 }FileHeadData;
 
 typedef struct {
+	Vector mem_page_bit_map;
+	Vector rows;
 	char* filename_;
-	Vector page_bit_map;
-
+	FileHeadData* filehead;
 	char* page_states;
 	Vector* cols;
-	Vector rows;
-	FileHeadData* filehead;
-	void* d;
 }FHead;
 
 FileHeadData* new_file_head_data(size_t pagecount,
