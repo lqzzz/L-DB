@@ -7,21 +7,6 @@
 fprintf(stderr, buf,var); goto ERROR;\
 }while(0)
 
-struct select {
-	Vector v_col;//pair*
-	Vector v_from;//table*
-	struct con* con_;
-};
-
-struct update {
-	struct setlist {
-		Pair col_value;
-		Listhead head_;
-	}*set_list;
-	Table* table_;
-	struct con* con_;
-};
-
 __inline void* create_con(int oper, void* leftcon, void* rightcon);
 __inline void con_del(struct con* con);
 __inline void* get_con_exp(DBnode* db, Token** curr);

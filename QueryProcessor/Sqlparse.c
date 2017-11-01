@@ -19,6 +19,7 @@ static int parse_create(char* errmsg,DBnode* dbnode, Token** curr);
 static Table* parse_create_table(char* errmsg,DBnode *dbnode,Token** token);
 static int parse_create_column(char* errmsg,Table* t,Token** token);
 static int parse_datatype(char* errmsg,int datatype, Token**);
+
 //static int parse_insert(char* errmsg, DBnode*, Token**);
 //static int parse_insert_values(char* errmsg, DBnode*, Table*, Vector*, Token**);
 
@@ -175,7 +176,8 @@ static int parse_create(char* errmsg,DBnode* dbnode, Token** curr) {
 		NEXT_TOKEN;
 		DBnode* db_ = database_create(db_name, ((DBnode*)dbnode->list_head.prve_)->id_ + 1, 0);
 		new_bufferManager(db_);
-		LIST_ADD_TAIL(&dbnode->list_head, &db_->list_head);
+		if(dbnode)
+			LIST_ADD_TAIL(&dbnode->list_head, &db_->list_head);
 		return SQL_OK;
 	default:
 		PARSE_ERROR("创建节点无效");
@@ -212,6 +214,8 @@ int sql_parse(char* errmsg,DBnode *db, Token* token_head) {
 			if (MOVE_NEXT_TOKEN_TYPE != INTO) PARSE_ERROR("缺少INTO");
 			if (MOVE_NEXT_TOKEN_TYPE != ID) PARSE_ERROR("缺少ID");
 			//if (parse_insert(errmsg,dbnode, curr) == -1) goto ERROR;
+			break;
+		case UPDATE:
 			break;
 		default:
 			break;
@@ -252,6 +256,7 @@ int parse_create_column(char* errmsg,Table* t, Token** curr) {
 	for (;;) {
 		if (MOVE_NEXT_TOKEN_TYPE != ID)
 			PARSE_ERROR("缺少列名");
+
 		char* col_name = (*curr)->value_;
 		int col_id = t->t_info.table_col_count;
 		int data_type = MOVE_NEXT_TOKEN_TYPE;

@@ -86,7 +86,7 @@ FHead* new_file_head(char* filename, FileHeadData* fhd){
 	FHead* fh = mem_alloc(sizeof(*fh));
 	//
 	fh->filename_ = filename;
-	VECTOR_INIT_LEN(&fh->page_bit_map, PageCount);
+	VECTOR_INIT_LEN(&fh->mem_page_bit_map, PageCount);
 	fh->filehead = fhd;
 	fh->page_states = fhd->page_state_head;
 	return fh;
@@ -156,7 +156,7 @@ char * get_file_name(FHead* p){
 	return p->filename_;
 }
 
-int next_page_id(FHead* p, size_t* index) {
+int next_page_id(const FHead* p, size_t* index) {
 	if (page_has_next(p, *index) == P_ERROR);
 		return P_ERROR;
 	if (p->filehead->page_state_head[*index] == P_EMPTY) {
@@ -240,7 +240,7 @@ int page_add_row(Page* p, size_t slot_index,const char* row) {
 
 
 
-char* page_next_row(Page* p,size_t* rowiter) {
+char* page_next_row(const Page* p,size_t* rowiter) {
 	if (row_has_next(p, *rowiter) == P_ERROR)
 		return NULL;
 	if (p->slot_state_head_ptr[*rowiter] == P_EMPTY) {

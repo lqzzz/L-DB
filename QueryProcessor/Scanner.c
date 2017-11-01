@@ -164,7 +164,7 @@ void token_del(Token* token){
 	mem_free(token);
 }
 
-Token* scanner(char* errmsg,char ** ptrsqlstr, int * c_num, int * l_num){
+Token* scanner(char* errmsg,char** ptrsqlstr, int * c_num, int * l_num){
 	Token* token_head;
 	if ((token_head = get_next_token(errmsg, ptrsqlstr, c_num, l_num)) == NULL) {
 		sprintf(errmsg, "%s", "¿Õsql×Ö·û´®\n");

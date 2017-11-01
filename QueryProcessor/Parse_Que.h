@@ -11,8 +11,6 @@ typedef struct con {
 	enum Tokentype operator_; // and or not  eq ex...
 	Pair *left_opand, *right_opand;
 	struct con* next_;
-	Vector rows;
-	VectorIter iter;
 	//Relation* res_;
 }Logicplan;
 
