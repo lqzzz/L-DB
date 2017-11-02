@@ -12,7 +12,7 @@ void* dbnode_search(void* head,const char* name){
 }
 
 Table* db_get_table(DBnode * db, char * tablename){
-	return vector_search(&db->tables, tablename, table_cmp_name);
+	return vector_search(&db->tables, tablename, table_match_name);
 }
 
 void db_add_table(DBnode * db, Table * t){
@@ -25,6 +25,7 @@ DBnode* database_create(char* name,size_t id,size_t tablecount){
 	strcpy(dbnode->name_, name);
 	dbnode->id_ = id;
 	dbnode->table_count = tablecount;
+	VECTOR_INIT(&dbnode->tables);
 	LIST_INIT(dbnode);
 	return dbnode;
 }
@@ -55,8 +56,8 @@ void col_set_info(Column * col, size_t column_num, enum TokenType column_data_ty
 	col->column_data_len = datalen;
 }
 
-int col_cmp_name(Column * col1, Column * col2){
-	return strcmp(col1->column_name, col2->column_name);
+int col_match_name(Column * col1, const char* name){
+	return strcmp(col1->column_name, name);
 }
 
 void col_del(Column* col){
@@ -129,7 +130,7 @@ Table* new_table(char* tablename,char* dbname,size_t id){
 	strcpy(t->t_info.table_db_name, dbname);
 	t->t_info.table_num = id;
 	VectorSetFreeMethod(&t->cols,col_del);
-	VectorSetCompMethod(&t->cols,col_cmp_name);
+	//VectorSetCompMethod(&t->cols,col_cmp_name);
 	VECTOR_INIT_LEN(&t->cols, V_INIT_LEN);
 	return t;
 }
@@ -317,12 +318,12 @@ void table_del(Table * table){
 	mem_free(table);
 }
 
-int table_cmp_name(Table * t1, Table * t2){
-	return strcmp(t1->t_info.table_name,t2->t_info.table_name);
+int table_match_name(Table * t1, const char* name){
+	return strcmp(t1->t_info.table_name,name);
 }
 
-Column * table_get_col(Table * t, char* colname){
-	return vector_search(&t->cols, colname, col_cmp_name);
+Column * table_get_col(Table * t, const char* colname){
+	return vector_search(&t->cols, colname, col_match_name);
 }
 
 void table_add_col(Table * t, Column * col){

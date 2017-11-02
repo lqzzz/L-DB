@@ -42,6 +42,7 @@ typedef struct {
 	size_t column_unique;
 	size_t column_rec_offset;
 	size_t column_data_len;
+	size_t column_max_len;
 	char column_name[NAME_LEN];
 	char column_table_name[NAME_LEN];
 	char column_db_name[NAME_LEN];
@@ -80,7 +81,7 @@ void db_print(DBnode* dbh);
 void table_print(DBnode* db);
 Table* new_table(char* tablename,char* dbname,size_t id);
 void table_del(Table* table);
-int table_cmp_name(Table* t1, Table* t2);
+int table_match_name(Table* t1, const char* name);
 Column* table_get_col(Table* t, char* colname);
 void table_add_col(Table* t, Column* col);
 void table_init(Table* table, char* name,
@@ -90,7 +91,7 @@ void table_init(Table* table, char* name,
 //void table_print(Table* t);
 
 Column* new_column(char* colname, char* tablename, char*dbname, size_t id,enum TokenType DT,size_t datalen);
-int col_cmp_name(Column* col1,Column* col2);
+int col_match_name(Column* col1,const char* name);
 void col_del(Column* col);
 size_t get_max_data_len(void* item,enum Tokentype datatype,size_t currmaxlen);
 void col_set_info(Column* col,

@@ -2,7 +2,7 @@
 #define _CLIENT_H
 #include"BaseStruct\Listhead.h"
 #include"QueryProcessor\Scanner.h"
-
+#include"QueryProcessor\Sqlparse.h"
 #define COMMAND 0;
 #define DATASET 1;
 
@@ -14,6 +14,7 @@ typedef struct {
 	int comm_cnum;
 	int comm_lnum;
 	Token* token_head;
+	QueryNode* quenode;
 	char errmsg[128];
 }Client;
 

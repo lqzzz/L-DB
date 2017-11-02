@@ -25,9 +25,6 @@ int col_info_update(Column * col);
 int table_info_update(Table * table);
 
 static void meta_test_init(void) {
-
-	//sysdb = init_sys_data();
-
 	db1 = database_create("T_1", 0, 0);
 	db2 = database_create("T_2", 1, 0);
 	LIST_ADD_TAIL(&db1->list_head, &db2->list_head);
@@ -111,6 +108,7 @@ void meta_test(void) {
 	//add_test();
 	//db_print(db1);
 	read_test();
-	//remove(fh->filename_);
-
+	remove("ColumnInfo.df");
+	remove("TableInfo.df");
+	remove("DBInfo.df");
 }

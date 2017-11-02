@@ -95,7 +95,7 @@ void vector_del_nofree(Vector*);
 
 int32_t vector_insert(size_t index, Vector *v, void* value);
 int32_t vector_copy(Vector* vdest, Vector* vsrc);
-Vector* vector_value_copy(Vector *vsrc);
+//Vector* vector_value_copy(Vector *vsrc);
 VectorIter* vector_get_iter(Vector* v);
 void vector_init_iter(Vector*, VectorIter*);
 VectorIter* vector_get_end(Vector* v);

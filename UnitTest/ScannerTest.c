@@ -2,13 +2,17 @@
 #include"../QueryProcessor/Scanner.h"
 #include<string.h>
 #include"../Mem/MemPool.h"
+#include"../Meta.h"
 char* sqlstr = "create table t1(col1 int, col2 char, col3 char(10))";
 char* s;
 int c = 0;
 int l = 0;
 
 static void print_token(Token* t) {
-	printf("Type : %d,Value : %s\n", t->token_type, t->value_);
+	if(t->token_type == INT)
+		printf("Type : %d,Value : %d\n", t->token_type, t->value_);
+	else
+		printf("Type : %d,Value : %s\n", t->token_type, t->value_);
 }
 
 void scanner_test_init(void) {

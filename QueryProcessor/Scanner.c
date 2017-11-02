@@ -63,29 +63,33 @@ static Token* get_next_token(char* errmsg,char** ptrsqlstr,int* c_num,int* l_num
 				}
 				break;
 			case NUMBER: {
+				char* value = NULL;
 				int token_type = INT;
 				int num_ = 0;
 				while (ch >= '0' && ch <= '9') {
 					num_ = num_ * 10 + (ch - '0');
 					(*c_num)++;
-					len_++;
 					ch = *++*src_;
 				}
 				if (ch == '.') {
+					(*c_num)++;
+					ch = *++*src_;
 					token_type = FLOAT;
-					int carry = 10;
+					int carry = 1;
+
 					while (ch >= '0' && ch <= '9') {
-						num_ += (ch - '0') / carry;
+						num_ = num_ * 10 + (ch - '0');
 						(*c_num)++;
-						len_++;
 						ch = *++*src_;
 						carry *= 10;
 					}
+					float f = (num_ * 1.0) / carry;
+
+					memcpy(&value, &f, sizeof(void*));
 				}
-				Token* token_ = token_new(NULL, *c_num, *l_num, token_type);
-				token_->value_ = mem_alloc(sizeof(int));
-				memcpy(token_->value_, &num_, sizeof(int));
-				return token_;
+				else memcpy(&value, &num_, sizeof(void*));
+
+				return token_new(value, *c_num, *l_num, token_type);
 			}
 			case TEXT:
 				p = ++*src_;
@@ -100,7 +104,7 @@ static Token* get_next_token(char* errmsg,char** ptrsqlstr,int* c_num,int* l_num
 				break;
 			default:
 				++*src_;
-				int token_type;
+				int token_type = 0;
 				switch (ch) {
 				case '(': 
 					token_type = LB; 

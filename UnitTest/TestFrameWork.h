@@ -1,6 +1,7 @@
 #ifndef __TESTFRAMEWORK_H
 #define __TESTFRAMEWORK_H
 #include<stdio.h>
+#include<assert.h>
 extern int main_ret;
 extern int test_count;
 extern int test_pass;
