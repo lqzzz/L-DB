@@ -322,7 +322,7 @@ int table_match_name(Table * t1, const char* name){
 	return strcmp(t1->t_info.table_name,name);
 }
 
-Column * table_get_col(Table * t, const char* colname){
+Column* table_get_col(Table * t, const char* colname){
 	return vector_search(&t->cols, colname, col_match_name);
 }
 

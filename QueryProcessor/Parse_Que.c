@@ -1,3 +1,4 @@
+#include "Sqlparse.h"
 #include "Parse_Que.h"
 #include"../Mem/MemPool.h"
 #include"../Mem/obj.h"
@@ -14,9 +15,9 @@ __inline void* get_term(DBnode* db,Token** curr);
 __inline void* get_factor(DBnode* db,Token** curr);
 __inline int32_t get_base_exp(DBnode* db, Pair* p, Token** curr);
 __inline int32_t check_con(DBnode* db, struct con* con,Vector* vfrom);
-
 __inline int32_t check_schema(DBnode* db,Pair* table_col,Vector* vfrom); 
 __inline void* create_join(Table* table, Vector* from);
+
 __inline Relation* con_join_exec(Relation* rela, DBnode* db, struct con* con);
 __inline Relation* con_where_exec(Relation*, DBnode* db, struct con* con);
 
@@ -395,5 +396,7 @@ void con_del(struct con* con){
 	PAIR_FREE(con->right_opand);
 	mem_free(con);
 }
+
+
 
 
