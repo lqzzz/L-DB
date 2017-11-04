@@ -1,4 +1,15 @@
 #include "Listhead.h"
+size_t list_len(Listhead* list){
+	Listhead* head = list;
+	if (LIST_MOVE_NEXT(&head) == list)
+		return  1;
+
+	size_t len = 1;
+	while (LIST_MOVE_NEXT(&head) != list)
+		len++;
+	return len;
+}
+
 void list_del_all(Listhead* head,void del(void* )){
 	Listhead *next_ = head->next_;
 	while (next_ != head) {

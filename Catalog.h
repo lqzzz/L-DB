@@ -6,7 +6,7 @@
 #define NAME_LEN 24 
 
 #define DBNODE_SEARCH(head,key) list_search(head,key,db_match_name)
-
+#define TABLE_GET_NAME(t) (t)->t_info.table_name
 enum Tokentype {
 	CREATE = 1, USE, DATABASE, TABLE, INDEX, UPDATE, 
 	NUMBER, TEXT, FLOAT, DATE, DATETIME, TIME, INT, CHAR, BOOL, VARCHAR,

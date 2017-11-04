@@ -1,131 +1,129 @@
-#include "Scanner.h"
-#include "Relation.h"
-#include "../BaseStruct/Listhead.h"
-#include "../Catalog.h"
-#include "../BaseStruct/Vector.h"
 #include "../Mem/MemPool.h"
-#include "../BaseStruct/Pair.h"
-#include "../StorageEngine/BufferManager.h"
 #include"Sqlparse.h"`
 
-QueryNode * new_select_query(SelectNode* select){
+QueryNode* new_select_query(void){
 	QueryNode* n = mem_alloc(sizeof(*n));
 	n->type = SELECT;
-	n->select_node = select;
+	n->select_node = new_select_node();
 	return n;
 }
 
-QueryNode* new_select_node(){
-	QueryNode* n = mem_alloc(sizeof(*n));
-
-	n->con_type = SELECT;
-
+JoinNode* new_join_node(Table* t){
+	JoinNode* n = mem_calloc(1,sizeof(JoinNode));
+	n->table_ = t;
 	return n;
 }
 
-void dbitem_add(DBitem* head, DBitem * addnode){
-	
+JoinNode * join_lr(JoinNode* left, JoinNode* right){
+	JoinNode* n = mem_calloc(1, sizeof(JoinNode));
+	n->left = left;
+	n->right = right;
+	return n;
 }
 
-QueryNode* new_insert_query(InsertNode* insert){
-	QueryNode* n = mem_alloc(sizeof(*n));
+
+
+QueryNode* new_insert_query(){
+	QueryNode* n = mem_alloc(sizeof(QueryNode));
+	n->insert_node = new_insert_node();
 	n->type = INSERT;
-	n->insert_node = insert;
 	return n;
 }
 
-int get_query_head(char* errmsg,DBnode* db,DBitem* item,Token** curr) {
-	if (TOKEN_TYPE != ID) PARSE_ERROR("缺少ID");
+DBitems* get_item(char* errmsg,DBnode* db,Token** curr,int flag) {
+	DBitems *item;
+	Table* t;
+	Column* col;
+	char* table_name = (*curr)->value_;
+
+	if (TOKEN_TYPE != ID) 
+		PARSE_ERROR("缺少ID");
+
+	if ((t = db_get_table(db, table_name)) == NULL)
+		QUERY_ERROR("表名 %s 无效\n", table_name);
+
+	if (flag == FROM_ITEM) {
+		item = mem_alloc(sizeof(DBitems));
+		item->table_ = t;
+		return item;
+	}
+
+	if (flag == INSERT_ITEM) {
+		item = mem_alloc(sizeof(DBitems));
+		move_value(&(*curr)->value_, &item->insert_item);
+		return item;
+	}
 
 	if (NEXT_TOKEN_TYPE == DOT) {
-		move_value(&(*curr)->value_, &item->tablename);
 		NEXT_TOKEN;
 		NEXT_TOKEN;
-		if (TOKEN_TYPE != ID) PARSE_ERROR("缺少ID");
+		if (TOKEN_TYPE != ID) 
+			PARSE_ERROR("缺少ID");
 	}
-	move_value(&(*curr)->value_, &item->colname);
+
+	if ((col = table_get_col(t, (*curr)->value_)) == NULL)
+		QUERY_ERROR("列名 %s 无效\n", (*curr)->value_);
 
 	NEXT_TOKEN;
-	return SQL_OK;
+
+	item = mem_alloc(sizeof(DBitems));
+	item->table_ = t;
+	item->col_ = col;
+	return item;
 ERROR:
-	return SQL_ERROR;
+	return NULL;
 }
 
-int check_dbitem(char* errmsg, DBnode* db, DBitem* item, Vector* vfrom){
-	Table* from_table;
-	char* table_name = item->tablename;
-	int hit_ = 0;
-	if (table_name == NULL) {
-		char* col_name = item->colname;
+int get_item_list(char* errmsg,DBitems** ph, DBnode* db, Token** curr,int flag) {
+	for (;;) {
+		DBitems *item;
+		if ((item = get_item(errmsg, db, curr,flag)) == NULL)
+			return SQL_ERROR;
+		DBitems_ADD(*ph, item);
+		//可能sql已经结束
+		if (TOKEN_TYPE != COMMA)
+			return SQL_OK;
 
-		VECTOR_FOREACH(from_table, vfrom,
-			
-			if (table_get_col(from_table,col_name) != NULL)
+		NEXT_TOKEN;
+	}
+}
+
+int check_item(char* errmsg, DBitems* checknode,DBitems* from){
+	Table* t = checknode->table_;
+	int hit_ = 0;
+	if (t) {
+		DBitems* curr;
+		LIST_FOREACH(curr, from,
+			if (t == curr->table_) {
+				hit_ = 1;
+				break;
+			}
+		);
+		if (hit_ == 0) 
+			QUERY_ERROR("表 %s 不在from语句内\n", TABLE_GET_NAME(t));	
+	}else{
+		char* col_name = checknode->col_->column_name;
+		DBitems* item;
+		LIST_FOREACH(item, from,
+			if (table_get_col(from->table_, col_name) != NULL) 
 				hit_++;
-			);
+		);
 		if (hit_ == 0) QUERY_ERROR("列名 %s 无效\n", col_name);
 		if (hit_ > 1) QUERY_ERROR("列名 %s 不明确\n", col_name);
-	}else{
-		VECTOR_FOREACH(from_table, vfrom,
-			if (strcmp(table_name, from_table->t_info.table_name) == 0)
-				hit_ = 1;
-			);
-		if (hit_ == 0) 
-			QUERY_ERROR("表名 %s 无效\n", table_name);	
 	}
 	return SQL_OK;
 ERROR:
 	return SQL_ERROR;
 }
 
-int get_schema(char* errmsg,DBnode* db,Pair* sch,Token** curr) {
-	if (TOKEN_TYPE != ID) PARSE_ERROR("缺少ID");
-	if (NEXT_TOKEN_TYPE == DOT) {
-		Table* target_table;
-		if ((target_table = db_get_table(db, (*curr)->value_)) == NULL) PARSE_ERROR("表名无效");
-		move_value(&(*curr)->value_, &sch->first_);
-		NEXT_TOKEN;
-		NEXT_TOKEN;
-		if (TOKEN_TYPE != ID) PARSE_ERROR("缺少ID");
-		if (table_get_col(target_table, (*curr)->value_) == NULL) PARSE_ERROR("列名无效");
-		move_value(&(*curr)->value_, &sch->second_);
-	}else 
-		move_value(&(*curr)->value_, &sch->second_);
-
-	NEXT_TOKEN;
+int check_item_list(char* errmsg, DBitems* checknode, DBitems* from) {
+	DBitems *item;
+	LIST_FOREACH(item, checknode,
+		if (check_item(errmsg, item, from) == SQL_ERROR)
+			return SQL_ERROR;
+	);
 	return SQL_OK;
-ERROR:
-	return SQL_ERROR;
 }
-
-int check_schema(char* errmsg, DBnode* db, Pair* p, Vector* vfrom){
-	if (p == NULL || PairGetSecond(p) == NULL)
-		return SQL_OK;
-	Table* from_table;
-	char* table_name = PairGetFirst(p);
-	int hit_ = 0;
-	if (table_name == NULL) {
-		char* col_name = PairGetSecond(p);
-		VECTOR_FOREACH(from_table, vfrom,
-			
-			if (table_get_col(from_table,col_name) != NULL)
-				hit_++;
-			);
-		if (hit_ == 0) QUERY_ERROR("列名 %s 无效\n", col_name);
-		if (hit_ > 1) QUERY_ERROR("列名 %s 不明确\n", col_name);
-	}else{
-		VECTOR_FOREACH(from_table, vfrom,
-			if (strcmp(table_name, from_table->t_info.table_name) == 0)
-				hit_ = 1;
-			);
-		if (hit_ == 0) 
-			QUERY_ERROR("表名 %s 无效\n", table_name);	
-	}
-	return SQL_OK;
-ERROR:
-	return SQL_ERROR;
-}
-
 
 int sql_parse(char* errmsg,DBnode *db, Token* token_head,QueryNode** pnode) {
 	Token* t_curr = token_head;

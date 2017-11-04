@@ -11,6 +11,11 @@
 #define SQL_ERROR -1
 #define SQL_OK 1
 
+#define FROM_ITEM 1
+#define TAB_COL_ITEM 2
+#define INSERT_ITEM 3
+
+
 #define PARSE_ERROR(buf) do{\
 sprintf(errmsg, " %d 行, %d 列 错误：%s\n", (*curr)->l_num, (*curr)->c_num, buf); goto ERROR;\
 }while(0)
@@ -19,7 +24,7 @@ sprintf(errmsg, " %d 行, %d 列 错误：%s\n", (*curr)->l_num, (*curr)->c_num, buf)
 sprintf(errmsg, buf,var); goto ERROR;\
 }while(0)
 
-#define DBITEM_ADD(_head,_item) \
+#define DBitems_ADD(_head,_item) \
 	if ((_head) == NULL)\
 		_head = _item; \
 	else LIST_ADD_TAIL(&(_head)->head, &(_item)->head) \
@@ -30,30 +35,29 @@ typedef struct select SelectNode;
 typedef struct join JoinNode;
 typedef struct condition WhereNode;
 typedef struct query QueryNode;
-typedef struct selectitem;
+//typedef struct selectitem;
 
 typedef struct {
 	Listhead head;
-	
-	char* tablename;
-	char* colname;
+
+	Table* table_;
+	Column* col_;
 	enum Tokentype function_type;
 	char* byname;
+	char* base_item;
 
-	Table* from_table;
-}DBitem;
+}DBitems;
 
 typedef struct join{
-	char* table_name;
+	Table* table_;
 	JoinNode *left, *right;
 }JoinNode;
 
 typedef struct condition{
 	enum Tokentype operator_; // and or not  eq ex...
-	DBitem left_opand, right_opand;
-	WhereNode *left, *right;
-	JoinNode *join_node;
-	struct select *sub_query;
+	DBitems left_opand, right_opand; // 基本表达式使用
+	WhereNode *left, *right; 
+	SelectNode* sub_query;
 }WhereNode;
 
 
@@ -74,9 +78,7 @@ typedef struct query{
 	};
 
 
-	union {
-		Vector insert_rows,select_cols;
-	};
+	Vector insert_rows, select_cols;
 
 	enum Tokentype con_type; // WHERE SELECT JOIN INSERT
 	QueryNode *left_con, *right_con, *rows_node;
@@ -87,25 +89,27 @@ typedef struct query{
 	FHead* file_;
 }QueryNode;
 
-void dbitem_add(DBitem* head, DBitem* addnode);
-QueryNode* new_insert_query(InsertNode* insert);
-//DBitem* get_from(char* errmsg,DBnode* dbnode,Token** curr);
+QueryNode* new_insert_query(void);
 
-void* create_con(int oper, void* leftcon, void* rightcon);
-void con_del(struct con* con);
-//QueryNode* new_insert_node();
-QueryNode* new_select_query();
-QueryNode* new_join_node();
+//DBitems* get_from(char* errmsg,DBnode* dbnode,Token** curr);
 
-void* create_join(char* errmsg,Table* table, Vector* from);
+InsertNode* new_insert_node(void);
+
+SelectNode* new_select_node(void);
+QueryNode* new_select_query(void);
+
+JoinNode* new_join_node(Table* t);
+JoinNode* join_lr(JoinNode* left, JoinNode* right);
+
+int get_item_list(char* errmsg, DBitems** ph, DBnode* db, Token** curr, int isfrom);
+DBitems* get_item(char* errmsg, DBnode* db, Token** curr, int isfrom);
+int check_item_list(char* errmsg, DBitems* checknode, DBitems* from);
+int check_item(char* errmsg, DBitems* checknode, DBitems* from);
+
 void* get_con_exp(DBnode* db, Token** curr);
 void* get_term(DBnode* db,Token** curr);
 void* get_factor(DBnode* db,Token** curr);
 int get_base_exp(DBnode* db, Pair* p, Token** curr);
-int check_con(DBnode* db, struct con* con,Vector* vfrom);
-int get_schema(char* errmsg, DBnode* db, Pair* sch, Token** curr);
-int check_schema(char* errmsg, DBnode* db, Pair* p, Vector* vfrom);
-void* create_join(Table* table, Vector* from);
 
 int sql_parse(char* errmsg,DBnode *dbnode, Token* tokenhead,QueryNode** node);
 
@@ -115,7 +119,6 @@ Table* parse_create_table(char* errmsg,DBnode *dbnode,Token** token);
 int parse_create_column(char* errmsg,Table* t,Token** token);
 int parse_datatype(char* errmsg,int datatype, Token**);
 int parse_insert(char* errmsg, DBnode* dbnode, Token** curr, QueryNode** pnode);
-int parse_insert_values(char* errmsg, DBnode* db, Table* table, Vector* collist, Token** curr, QueryNode** pnode);
 
 #endif // !_TOKENIZER_H
  

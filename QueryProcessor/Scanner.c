@@ -101,6 +101,7 @@ static Token* get_next_token(char* errmsg,char** ptrsqlstr,int* c_num,int* l_num
 					ch = *++*src_;
 				}
 				++*src_;
+				//chartype = CHAR;
 				break;
 			default:
 				++*src_;
