@@ -4,7 +4,7 @@ size_t list_len(Listhead* list){
 	if (LIST_MOVE_NEXT(&head) == list)
 		return  1;
 
-	size_t len = 1;
+	size_t len = 2;
 	while (LIST_MOVE_NEXT(&head) != list)
 		len++;
 	return len;

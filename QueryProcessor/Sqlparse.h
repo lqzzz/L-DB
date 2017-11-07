@@ -7,13 +7,14 @@
 #include"Scanner.h"
 #include"../BaseStruct/Pair.h"
 #include"../StorageEngine/Page.h"
+#include"../Mem/obj.h"
 
 #define SQL_ERROR -1
 #define SQL_OK 1
 
 #define FROM_ITEM 1
 #define TAB_COL_ITEM 2
-#define INSERT_ITEM 3
+#define BASE_ITEM 3
 
 
 #define PARSE_ERROR(buf) do{\
@@ -42,24 +43,33 @@ typedef struct {
 
 	Table* table_;
 	Column* col_;
+	char* col_name;
 	enum Tokentype function_type;
 	char* byname;
-	char* base_item;
+	Token* base_item;
 
 }DBitems;
+
+
+typedef struct insert{
+	DBitems *set_cols, *insert_fields, *table_item;
+	char* insert_row;
+	SelectNode* select_node;
+}InsertNode;
 
 typedef struct join{
 	Table* table_;
 	JoinNode *left, *right;
+	obj* row_obj;
+	FHead* file;
 }JoinNode;
 
 typedef struct condition{
 	enum Tokentype operator_; // and or not  eq ex...
-	DBitems left_opand, right_opand; // 基本表达式使用
+	DBitems *left_opand, *right_opand; // 基本表达式使用
 	WhereNode *left, *right; 
 	SelectNode* sub_query;
 }WhereNode;
-
 
 typedef struct {
 	int is_del;
@@ -78,28 +88,26 @@ typedef struct query{
 	};
 
 
-	Vector insert_rows, select_cols;
+	//Vector insert_rows, select_cols; 
+	//enum Tokentype con_type; // WHERE SELECT JOIN INSERT
+	//QueryNode *left_con, *right_con, *rows_node;
 
-	enum Tokentype con_type; // WHERE SELECT JOIN INSERT
-	QueryNode *left_con, *right_con, *rows_node;
+	//enum Tokentype operator_; // and or not  eq ex...
+	//Pair left_opand, right_opand;
 
-	enum Tokentype operator_; // and or not  eq ex...
-	Pair left_opand, right_opand;
-
-	FHead* file_;
+	//FHead* file_;
 }QueryNode;
 
 QueryNode* new_insert_query(void);
-
-//DBitems* get_from(char* errmsg,DBnode* dbnode,Token** curr);
-
-InsertNode* new_insert_node(void);
-
-SelectNode* new_select_node(void);
 QueryNode* new_select_query(void);
-
+InsertNode* new_insert_node(void);
+SelectNode* new_select_node(void);
 JoinNode* new_join_node(Table* t);
 JoinNode* join_lr(JoinNode* left, JoinNode* right);
+
+DBitems* new_dbitem();
+void free_dbitem_list(DBitems* h);
+void free_dbitem(DBitems* i);
 
 int get_item_list(char* errmsg, DBitems** ph, DBnode* db, Token** curr, int isfrom);
 DBitems* get_item(char* errmsg, DBnode* db, Token** curr, int isfrom);
@@ -120,5 +128,6 @@ int parse_create_column(char* errmsg,Table* t,Token** token);
 int parse_datatype(char* errmsg,int datatype, Token**);
 int parse_insert(char* errmsg, DBnode* dbnode, Token** curr, QueryNode** pnode);
 
+int execute_select(char* errmsg,DBnode* db,SelectNode* sel);
 #endif // !_TOKENIZER_H
  

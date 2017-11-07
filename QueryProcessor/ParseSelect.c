@@ -37,7 +37,7 @@ int parse_select(char* errmsg,DBnode* db, Token** curr,QueryNode** qnode){
 		NEXT_TOKEN;
 	else if ( TOKEN_TYPE == ID && 
 			get_item_list(errmsg, &sel_node->select_items, 
-			db, curr,0) == SQL_ERROR) {
+			db, curr,TAB_COL_ITEM) == SQL_ERROR) {
 		goto ERROR;
 
 	}else 
@@ -47,7 +47,7 @@ int parse_select(char* errmsg,DBnode* db, Token** curr,QueryNode** qnode){
 		PARSE_ERROR("È±ÉÙFROM");
 	NEXT_TOKEN;
 
-	if (get_item_list(errmsg, &sel_node->from_items, db, curr,1) == SQL_ERROR)
+	if (get_item_list(errmsg, &sel_node->from_items, db, curr,FROM_ITEM) == SQL_ERROR)
 		goto ERROR;
 
 	if (check_item_list(errmsg, db, sel_node->select_items, sel_node->from_items) == SQL_ERROR)
@@ -66,3 +66,7 @@ int parse_select(char* errmsg,DBnode* db, Token** curr,QueryNode** qnode){
 ERROR:
 	return SQL_ERROR;
 }
+
+//int execute_select(char* errmsg,DBnode* db,SelectNode* sel) {
+//	
+//}

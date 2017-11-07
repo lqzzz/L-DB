@@ -8,10 +8,14 @@ static char sql_insert1[64] = "insert into test_table values(1,'col3',1.22)";
 static char sql_insert2[64] = "insert into test_table values(1,'col3')";
 static char sql_insert3[64] = "insert into test_table values(1,'col3',1.22,10)";
 static char sql_insert4[64] = "insert into test_table(col1,col3,col4) values(1,'col3',1.22)";
+static char sql_insert5[64] = "insert into test_table(col1,col2) values(1,'col3',1.22)";
+static char sql_from1[64] = "select col1,col2,col3 from test_table";
+static char* p_sql_from1 = sql_from1;
 static char* p_insert1 = sql_insert1;
 static char* p_insert2 = sql_insert2;
 static char* p_insert3 = sql_insert3;
 static char* p_insert4 = sql_insert4;
+static char* p_insert5 = sql_insert5;
 static char* p_db = sql_db;
 static char* p_table = sql_table;
 
@@ -63,20 +67,33 @@ static void insert_test(void) {
 	QueryNode* node2 = NULL;
 	QueryNode* node3 = NULL;
 	QueryNode* node4 = NULL;
+	QueryNode* node5 = NULL;
 	Token* t = scanner(errmsg, &p_insert1, &cnum, &lnum);
 	Token* t1 = scanner(errmsg, &p_insert2, &cnum, &lnum);
 	Token* t2 = scanner(errmsg, &p_insert3, &cnum, &lnum);
+	Token* t3 = scanner(errmsg, &p_insert4, &cnum, &lnum);
+	Token* t5 = scanner(errmsg, &p_insert5, &cnum, &lnum);
 
 	sql_parse(errmsg, test_db, t, &node);
 	EXPECT_EQ_INT(INSERT, node->type);
-	//EXPECT_EQ_INT(NULL, node->insert_node);
-	//EXPECT_EQ_INT(1, node->insert_node->insert_rowse);
-	//char* row = VECTOR_GET_VALUE(&node->insert_rows, 0);
-	//EXPECT_EQ_INT(1, *(int*)row);
-	//EXPECT_EQ_STR("col3", row + sizeof(int));
+	char* row = node->insert_node->insert_row;
+	EXPECT_EQ_INT(NULL, row == NULL);
+	EXPECT_EQ_INT(1, *(int*)row);
+	EXPECT_EQ_STR("col3", row + sizeof(int));
 
-	sql_parse(errmsg, test_db, t, &node4);
-	EXPECT_EQ_INT(INSERT, node4->type);
+	sql_parse(errmsg, test_db, t1, &node2);
+	puts(errmsg);
+
+	sql_parse(errmsg, test_db, t2, &node3);
+	puts(errmsg);
+
+	sql_parse(errmsg, test_db, t3, &node4);
+	puts(errmsg);
+
+	sql_parse(errmsg, test_db, t5, &node5);
+	puts(errmsg);
+
+	//EXPECT_EQ_INT(INSERT, node4->type);
 	//EXPECT_EQ_INT(NULL, node4->insert_node);
 	//EXPECT_EQ_INT(1, node4->insert_rows.usedsize_);
 	//row = VECTOR_GET_VALUE(&node4->insert_rows, 0);
@@ -84,13 +101,22 @@ static void insert_test(void) {
 	//EXPECT_EQ_STR("col3", row + sizeof(int));
 
 	//free node
-
-	sql_parse(errmsg, test_db, t1, &node2);
-	puts(errmsg);
-
-	sql_parse(errmsg, test_db, t2, &node3);
-	puts(errmsg);
 	
+}
+
+static from_test(void) {
+	int cnum = 0;
+	int lnum = 0;
+	QueryNode* node1 = NULL;
+	QueryNode* node2 = NULL;
+	QueryNode* node3 = NULL;
+	QueryNode* node4 = NULL;
+	Token* t1 = scanner(errmsg, &p_sql_from1, &cnum, &lnum);
+
+	sql_parse(errmsg, test_db, t, &node1);
+
+	EXPECT_EQ_INT(FROM, node1->type);
+
 }
 
 void sqltest(void) {

@@ -4,7 +4,7 @@
 #define LIST_INIT(head) ((Listhead*)head)->next_ = head; ((Listhead*)head)->prve_ = head
 #define LIST_GET_NEXT(head) ((Listhead*)head)->next_
 #define LIST_GET_PRVE(head) ((Listhead*)head)->prve_
-#define LIST_MOVE_NEXT(head) *(head) = ((Listhead*)*(head))->next_
+#define LIST_MOVE_NEXT(head) (*(head) = ((Listhead*)*(head))->next_)
 #define LIST_ENTRY(ptr,type,member) ((type *)((char *)(ptr)-(unsigned long)(&((type *)0)->member)))  
 
 #define LIST_ADD_TAIL(head,newnode)do{\
@@ -33,13 +33,13 @@
 #define LIST_DEL_ALL(listhead,del_fun)do{\
 	Listhead *_head = listhead;\
 	Listhead *_next = (listhead)->next_;\
-	void* delnode = _head;\
+	void* _delnode = _head;\
 	while (_next != _head) {\
-		delnode = _next;\
+		_delnode = _next;\
 		LIST_MOVE_NEXT(&_next);\
-		del_fun(delnode);\
+		del_fun(_delnode);\
 	}\
-	del_fun(delnode);\
+	del_fun(_delnode);\
 }while(0)
 
 typedef struct Listhead {

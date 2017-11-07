@@ -22,6 +22,7 @@ extern int test_pass;
 
 #define EXPECT_EQ_INT(expect, actual) EXPECT_EQ_BASE((expect) == (actual), expect, actual, "%d")
 #define EXPECT_EQ_STR(expect, actual) EXPECT_EQ_BASE(strcmp((expect),(actual)) == 0 ? 1 : 0, expect, actual, "%s")
+//#define EXPECT_ASSERT(expect, actual) EXPECT_EQ_BASE(strcmp((expect),(actual)) == 0 ? 1 : 0, expect, actual, "%s")
 
 //int test_strcmp(const char* str1, const char* str2);
 

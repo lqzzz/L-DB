@@ -112,8 +112,7 @@ static void* get_factor(DBnode* db,Token** curr) {
 	//con_->left_opand = mem_calloc(1,sizeof(struct opand));
 	if (get_base_exp(db, opand_, curr) == -1) goto ERROR;
 	con_->left_opand = opand_;
-	if (TOKEN_TYPE != IN    &&
-		TOKEN_TYPE != LIKE  &&
+	if (TOKEN_TYPE != LIKE  &&
 		TOKEN_TYPE != EQUAL &&
 		TOKEN_TYPE != LESSTHAN &&
 		TOKEN_TYPE != GREATERTHAN &&
