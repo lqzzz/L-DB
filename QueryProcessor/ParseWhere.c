@@ -1,11 +1,17 @@
 #include"Sqlparse.h"
-
-static WhereNode* get_exp(char* errmsg,DBnode* db, Token** curr,DBitems* itab);
+#define LOGIC 0
+#define NUMBER 1
+//static enum Type{
+//	logic,
+//	math,
+//	
+//};
+WhereNode* parse_where(char* errmsg,DBnode* db, Token** curr,DBitems* itab);
 static WhereNode* get_term(char* errmsg,DBnode* db,Token** curr,DBitems* itab);
 static WhereNode* get_factor(char* errmsg,DBnode* db,Token** curr,DBitems* itab);
 static WhereNode* get_plus_sub(char* errmsg,DBnode* db,Token** curr,DBitems* itab);
 static WhereNode* get_mul_div(char* errmsg,DBnode* db,Token** curr,DBitems* itab);
-static __inline int32_t get_base_exp(char* errmsg,DBnode* db, Pair* p, Token** curr);
+static WhereNode* get_base_item(char* errmsg, DBnode* db, Token** curr, DBitems* itab);
 
 WhereNode* new_where_node(int op) {
 	WhereNode* where_node = mem_calloc(1,sizeof(WhereNode));
@@ -24,16 +30,13 @@ void free_where(WhereNode* n) {
 	free_where(n);
 }
 
-WhereNode* get_exp(char* errmsg,DBnode* db, Token** curr,DBitems* itab) {
+WhereNode* parse_where(char* errmsg,DBnode* db, Token** curr,DBitems* itab) {
 	WhereNode* exp = NULL;
 	if ((exp = get_term(errmsg,db,curr, itab)) == NULL)
 		goto ERROR;
-	for (;;) {
-		if (TOKEN_TYPE != OR) 
-			break;
-		WhereNode* rn = NULL;
-		//struct con* right_con = NULL;
+	while(TOKEN_TYPE == OR){
 		NEXT_TOKEN;
+		WhereNode* rn;
 		if ((rn = get_term(errmsg,db, curr, itab)) == NULL)
 			goto ERROR;
 		WhereNode* or = new_where_node(OR);
@@ -41,6 +44,7 @@ WhereNode* get_exp(char* errmsg,DBnode* db, Token** curr,DBitems* itab) {
 		or->left = exp;
 		exp = or;
 	}
+
 	return exp;
 ERROR:
 	free_where(exp);
@@ -51,11 +55,9 @@ WhereNode* get_term(char* errmsg,DBnode* db,Token** curr,DBitems* itab){
 	WhereNode* exp = NULL;
 	if ((exp = get_factor(errmsg,db,curr, itab)) == NULL)
 		goto ERROR;
-	for (;;) {
-		if (TOKEN_TYPE != AND) 
-			break;
-		WhereNode* rn;
+	while(TOKEN_TYPE == AND) {
 		NEXT_TOKEN;
+		WhereNode* rn;
 		if ((rn = get_term(errmsg,db, curr, itab)) == NULL)
 			goto ERROR;
 		WhereNode* and = new_where_node(AND);
@@ -69,32 +71,31 @@ ERROR:
 	return NULL;
 }
 
-WhereNode* get_factor(char* errmsg,DBnode* db, Token** curr,DBitems* itab) {
-	WhereNode* exp = NULL;
+WhereNode* get_factor(char* errmsg, DBnode* db, Token** curr, DBitems* itab) {
+	WhereNode *exp = NULL;
 	if ((exp = get_plus_sub(errmsg, db, curr, itab)) == NULL)
 		goto ERROR;
-	for (;;) {
-		if (TOKEN_TYPE != IN    &&
-			TOKEN_TYPE != LIKE  &&
-			TOKEN_TYPE != EQUAL &&
-			TOKEN_TYPE != LESSTHAN &&
-			TOKEN_TYPE != GREATERTHAN &&
-			TOKEN_TYPE != LESS_OR_EQ &&
-			TOKEN_TYPE != GREATER_OR_EQ &&
-			TOKEN_TYPE != EXISTS &&
-			TOKEN_TYPE != NOT_EQUAL)
-			break;
+	while (TOKEN_TYPE == IN    ||
+		TOKEN_TYPE == LIKE  ||
+		TOKEN_TYPE == EQUAL ||
+		TOKEN_TYPE == LESSTHAN ||
+		TOKEN_TYPE == GREATERTHAN ||
+		TOKEN_TYPE == LESS_OR_EQ ||
+		TOKEN_TYPE == GREATER_OR_EQ ||
+		TOKEN_TYPE == EXISTS ||
+		TOKEN_TYPE == NOT_EQUAL) {
+
 		int op = TOKEN_TYPE;
-		WhereNode* rn;
-		NEXT_TOKEN;
-		if ((rn = get_factor(errmsg,db, curr, itab)) == NULL)
+		WhereNode *right_, *f;
+		if ((right_ = get_factor(errmsg, db, curr, itab)) == NULL)
 			goto ERROR;
-		WhereNode* f = new_where_node(op);
-		f->right = rn;
+		f = new_where_node(op);
+		f->right = right_;
 		f->left = exp;
 		exp = f;
 	}
 	return exp;
+
 ERROR:
 	free_where(exp);
 	return NULL;
@@ -122,40 +123,44 @@ ERROR:
 	free_where(exp);
 	return NULL;
 }
-
-WhereNode* get_mul_div(char* errmsg,DBnode* db, Token** curr,DBitems* itab) {
+WhereNode* get_base_item(char* errmsg, DBnode* db, Token** curr, DBitems* itab) {
 	WhereNode* exp = NULL;
 	if (TOKEN_TYPE == LB) {
 		NEXT_TOKEN;
-		if ((exp = get_plus_sub(errmsg, db, curr, itab)) == NULL)
+		if ((exp = parse_where(errmsg, db, curr, itab)) == NULL)
 			goto ERROR;
-		if (TOKEN_TYPE != RB) 
+		if (TOKEN_TYPE != RB)
 			PARSE_ERROR("È±ÉÙ )");
 		NEXT_TOKEN;
-		return exp;
-	}
-	for (;;) {
+	}else {
 		DBitems *litem;
 		if (TOKEN_TYPE == ID && (litem = get_item(errmsg, db, curr, TAB_COL_ITEM)) == NULL)
 			goto ERROR;
-		if ((litem = get_item(errmsg, db, curr, BASE_ITEM)) == NULL)
+		else if (TOKEN_TYPE != ID && (litem = get_item(errmsg, db, curr, BASE_ITEM)) == NULL)
 			goto ERROR;
-		if (check_item(errmsg, litem, itab) == SQL_ERROR)
-			goto ERROR;
-
 		exp = new_where_node(NULL);
 		exp->left_opand = litem;
+	}
+	return exp;
+ERROR:
+	free_where(exp);
+	return NULL;
+}
 
-		if (TOKEN_TYPE != MUL && TOKEN_TYPE != DIV)
-			break;
-
+WhereNode* get_mul_div(char* errmsg, DBnode* db, Token** curr, DBitems* itab) {
+	WhereNode *exp = NULL, *r = NULL;
+	if ((exp = get_base_item(errmsg,db,curr, itab)) == NULL)
+		goto ERROR;
+	while(TOKEN_TYPE == MUL || TOKEN_TYPE == DIV) {
 		int op = TOKEN_TYPE;
+
 		NEXT_TOKEN;
-		WhereNode* r;
 		if ((r = get_mul_div(errmsg, db, curr, itab)) == NULL)
 			goto ERROR;
 		//check type
 		WhereNode* n = new_where_node(op);
+		if (r->res_type != NUMBER)
+			goto ERROR;
 		n->left = exp;
 		n->right = r;
 		exp = n;
@@ -163,5 +168,6 @@ WhereNode* get_mul_div(char* errmsg,DBnode* db, Token** curr,DBitems* itab) {
 	return exp;
 ERROR:
 	free_where(exp);
+	free_where(r);
 	return NULL;
 }

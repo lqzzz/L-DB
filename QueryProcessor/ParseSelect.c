@@ -55,12 +55,11 @@ int parse_select(char* errmsg,DBnode* db, Token** curr,QueryNode** qnode){
 
 	sel_node->join = from_get_join(sel_node->from_items);
 
-	//if (TOKEN_TYPE == WHERE) {
-	//	NEXT_TOKEN;
-	//	if (((con_ = get_con_exp(db, curr)) == NULL || check_con(db, con_, &v_from) == -1))
-	//		goto ERROR;
-	//	con_->next_ = join_con;
-	//}else con_ = join_con;
+	if (TOKEN_TYPE == WHERE) {
+		NEXT_TOKEN;
+		if ((sel_node->condition = parse_where(errmsg, db, curr, sel_node->from_items)) == NULL)
+			goto ERROR;
+	}
 
 	return SQL_OK;
 ERROR:

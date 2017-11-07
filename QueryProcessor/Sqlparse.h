@@ -65,8 +65,9 @@ typedef struct join{
 }JoinNode;
 
 typedef struct condition{
+	int res_type;
 	enum Tokentype operator_; // and or not  eq ex...
-	DBitems *left_opand, *right_opand; // 基本表达式使用
+	DBitems *left_opand; // 基本表达式使用
 	WhereNode *left, *right; 
 	SelectNode* sub_query;
 }WhereNode;
@@ -121,12 +122,14 @@ int get_base_exp(DBnode* db, Pair* p, Token** curr);
 
 int sql_parse(char* errmsg,DBnode *dbnode, Token* tokenhead,QueryNode** node);
 
-int parse_select(char* errmsg,DBnode* db, Token** curr,QueryNode** qnode);
 int parse_create(char* errmsg,DBnode* dbnode, Token** curr);
 Table* parse_create_table(char* errmsg,DBnode *dbnode,Token** token);
 int parse_create_column(char* errmsg,Table* t,Token** token);
 int parse_datatype(char* errmsg,int datatype, Token**);
+
+int parse_select(char* errmsg,DBnode* db, Token** curr,QueryNode** qnode);
 int parse_insert(char* errmsg, DBnode* dbnode, Token** curr, QueryNode** pnode);
+WhereNode* parse_where(char* errmsg, DBnode* db, Token** curr, DBitems* itab);
 
 int execute_select(char* errmsg,DBnode* db,SelectNode* sel);
 #endif // !_TOKENIZER_H
