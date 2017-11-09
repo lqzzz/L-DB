@@ -168,8 +168,10 @@ int next_page_id(const FHead* p, size_t* index) {
 
 Page* file_get_page_by_id(FHead* f ,size_t pageid) {
 	Page* p;
-	//if ((p = dict_get_value(f->page_id_map, pageid)))
-	//	return p;
+	if((p=VECTOR_GET_VALUE()))
+	if ((p = dict_get_value(f->page_id_map, pageid)))
+		return p;
+
 	p = new_page(f->filehead->row_len, 
 		f->filehead->row_slot_count);
 	load_page(p, pageid, f);

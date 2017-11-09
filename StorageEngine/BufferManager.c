@@ -7,23 +7,25 @@
 #define NOT_DIRTY 0
 
 struct PageFrame{
+	Listhead* head;
 	int16_t is_dirty;
 	int32_t hot_;
 	Listhead PFlist_;
 	Page page_;
 };
 
+typedef struct PageFrame* FPtr;
+
 struct bm {
 	Listhead bm_list;
 	int DB_id;
 	Vector file_head_list;//<FHead>
 	Vector used_page_list;//<PageFram>
-	//FPtr lrulist;
+	FPtr lrulist;
 	//Vector other_page_list;
 };
 
 typedef struct bm* Ptr;
-typedef struct PageFrame* FPtr;
 
 static Ptr bm_list_head = NULL;
 

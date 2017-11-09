@@ -13,6 +13,11 @@ static WhereNode* get_plus_sub(char* errmsg,DBnode* db,Token** curr,DBitems* ita
 static WhereNode* get_mul_div(char* errmsg,DBnode* db,Token** curr,DBitems* itab);
 static WhereNode* get_base_item(char* errmsg, DBnode* db, Token** curr, DBitems* itab);
 
+//int execute_where(char* errmsg, DBnode* db, WhereNode* condition) {
+//	WhereNode* node = condition;
+//	node->res_type	
+//}
+
 WhereNode* new_where_node(int op) {
 	WhereNode* where_node = mem_calloc(1,sizeof(WhereNode));
 	where_node->operator_ = op;

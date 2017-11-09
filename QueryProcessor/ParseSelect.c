@@ -55,17 +55,17 @@ int parse_select(char* errmsg,DBnode* db, Token** curr,QueryNode** qnode){
 
 	sel_node->join = from_get_join(sel_node->from_items);
 
-	//if (TOKEN_TYPE == WHERE) {
-	//	NEXT_TOKEN;
-	//	if ((sel_node->condition = parse_where(errmsg, db, curr, sel_node->from_items)) == NULL)
-	//		goto ERROR;
-	//}
+	if (TOKEN_TYPE == WHERE) {
+		NEXT_TOKEN;
+		if ((sel_node->condition = parse_where(errmsg, db, curr, sel_node->from_items)) == NULL)
+			goto ERROR;
+	}
 
 	return SQL_OK;
 ERROR:
 	return SQL_ERROR;
 }
 
-//int execute_select(char* errmsg,DBnode* db,SelectNode* sel) {
-//	
-//}
+int execute_select(char* errmsg,DBnode* db,SelectNode* sel) {
+	SelectNode* node = sel;
+}

@@ -36,6 +36,7 @@ typedef struct{
 }FileHeadData;
 
 typedef struct {
+
 	Vector mem_page_bit_map;
 	Vector rows;
 	char* filename_;
