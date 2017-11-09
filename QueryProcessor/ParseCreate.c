@@ -1,5 +1,5 @@
 #include"Sqlparse.h"
-
+#include"../StorageEngine/BufferManager.h"
 int parse_create(char* errmsg,DBnode* dbnode, Token** curr) {
 	Table* table_ = NULL;
 	switch (TOKEN_TYPE)
@@ -69,7 +69,7 @@ int parse_datatype(char* errmsg,int datatype, Token** curr) {
 		if(MOVE_NEXT_TOKEN_TYPE != INT)
 			PARSE_ERROR("缺少数据长度");	
 
-		int len = (*curr)->value_;
+		int len = (int)(*curr)->value_;
 
 		(*curr)->value_ = NULL;
 

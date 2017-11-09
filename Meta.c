@@ -134,7 +134,7 @@ int read_column_info(void) {
 		fread(&column_count, sizeof(int), 1, fd);
 		for (int i = 0; i < column_count; i++) {
 
-			Column* col_ = new_column(NULL, NULL, NULL, NULL, 0, 0);
+			Column* col_ = new_column(NULL, NULL, NULL, 0, 0, 0);
 			fread(&col_, sizeof(ColumnInfo), 1, fd);
 
 			DBnode* db_ = DBNODE_SEARCH(dbhead, col_->column_db_name);

@@ -38,6 +38,7 @@ typedef struct condition WhereNode;
 typedef struct query QueryNode;
 //typedef struct selectitem;
 
+
 typedef struct {
 	Listhead head;
 
@@ -47,9 +48,14 @@ typedef struct {
 	enum Tokentype function_type;
 	char* byname;
 	Token* base_item;
-
 }DBitems;
 
+typedef struct select{
+	DBitems *select_items, *from_items, *group_by_items;
+	WhereNode* condition;
+	WhereNode* having;
+	JoinNode* join;
+}SelectNode;
 
 typedef struct insert{
 	DBitems *set_cols, *insert_fields, *table_item;
@@ -62,12 +68,14 @@ typedef struct join{
 	JoinNode *left, *right;
 	obj* row_obj;
 	FHead* file;
+	int pid;
+	int rid;
 }JoinNode;
 
 typedef struct condition{
 	int res_type;
 	enum Tokentype operator_; // and or not  eq ex...
-	DBitems *left_opand; // 基本表达式使用
+	DBitems *opand; // 基本表达式使用
 	WhereNode *left, *right; 
 	SelectNode* sub_query;
 }WhereNode;
@@ -115,11 +123,6 @@ DBitems* get_item(char* errmsg, DBnode* db, Token** curr, int isfrom);
 int check_item_list(char* errmsg, DBitems* checknode, DBitems* from);
 int check_item(char* errmsg, DBitems* checknode, DBitems* from);
 
-void* get_con_exp(DBnode* db, Token** curr);
-void* get_term(DBnode* db,Token** curr);
-void* get_factor(DBnode* db,Token** curr);
-int get_base_exp(DBnode* db, Pair* p, Token** curr);
-
 int sql_parse(char* errmsg,DBnode *dbnode, Token* tokenhead,QueryNode** node);
 
 int parse_create(char* errmsg,DBnode* dbnode, Token** curr);
@@ -132,5 +135,7 @@ int parse_insert(char* errmsg, DBnode* dbnode, Token** curr, QueryNode** pnode);
 WhereNode* parse_where(char* errmsg, DBnode* db, Token** curr, DBitems* itab);
 
 int execute_select(char* errmsg,DBnode* db,SelectNode* sel);
+
+
 #endif // !_TOKENIZER_H
  

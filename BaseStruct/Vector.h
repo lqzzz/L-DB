@@ -105,7 +105,7 @@ int32_t vector_eq_iter(VectorIter *begin, VectorIter *end);
 
 Vector* vector_filter(Vector* v);
 void vector_sort(Vector* v);
-void* vector_search(Vector* v,void* key,int32_t(*comp_)(void*, void*));
+void* vector_search(Vector* v,const void* key,int32_t(*comp_)(void*, void*));
 int16_t vector_has_next(VectorIter* iter);
 void* vector_next(VectorIter* iter);
 

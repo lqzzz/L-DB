@@ -77,7 +77,7 @@ size_t get_max_data_len(void * item, enum Tokentype datatype,size_t currmaxlen) 
 		if (item_len > max_len)
 			max_len = item_len;
 	}
-			  break;
+	break;
 	case FLOAT: {
 		int num_ = *(float*)(item);
 		while (num_ != 0) {
@@ -322,7 +322,7 @@ int table_match_name(Table * t1, const char* name){
 	return strcmp(t1->t_info.table_name,name);
 }
 
-Column* table_get_col(Table * t, const char* colname){
+Column* table_get_col(Table* t, const char* colname){
 	return vector_search(&t->cols, colname, col_match_name);
 }
 

@@ -104,7 +104,7 @@ int parse_insert(char* errmsg,DBnode* db, Token** curr,QueryNode** pnode) {
 	*pnode = new_insert_query();
 	Table* table_;
 	if ((table_ = db_get_table(db, (*curr)->value_)) == NULL)
-		QUERY_ERROR("无效表明", (*curr)->value_);
+		QUERY_ERROR("无效表名", (*curr)->value_);
 
 	(*pnode)->insert_node->table_item->table_ = table_;
 

@@ -28,7 +28,7 @@ typedef struct PageFrame* FPtr;
 static Ptr bm_list_head = NULL;
 
 static FPtr new_pageframe(const char* tablename);
-__inline static FHead* find_file_head(Ptr bm, char* filename);
+__inline static FHead* find_file_head(Ptr bm, const char* filename);
 
 Ptr get_bm_head(void) {
 	return bm_list_head;
@@ -83,6 +83,11 @@ void bm_add_file_head(int DBid, FHead* filehead) {
 	VECTOR_PUSHBACK(&(get_buffman(DBid)->file_head_list), filehead);
 }
 
+char* scan_table(char* tablename, int* pid, int* rid){
+	
+	return NULL;
+}
+
 //__inline Page* alloc_page(Ptr bm) {
 //	FPtr fp = vector_pop(&bm->empty_page_list);
 //	if (fp) 
@@ -91,37 +96,38 @@ void bm_add_file_head(int DBid, FHead* filehead) {
 //		VECTOR_PUSHBACK(&bm->used_page_list, fp = new_pageframe());
 //	return &fp->page_;
 //}
+//
+char* get_next_row(Ptr bm, char* filename, size_t *pageiter, size_t *rowiter) {
+	FHead* file_head = NULL;
+	Page* page_ = NULL;
+	FPtr pf_ = NULL;
+	char* next_row = NULL;
+	size_t page_id = 0;
+	file_head = find_file_head(bm, filename);
 
-//char* get_next_row(Ptr bm,char* filename, size_t *pageiter, size_t *rowiter) {
-//	FHead* file_head = NULL;
-//	Page* page_ = NULL;
-//	FPtr pf_ = NULL;
-//	char* next_row = NULL;
-//	size_t page_id = 0;
-//	file_head = find_file_head(bm, filename);
-//
-//	if (page_id = next_page_id(file_head, pageiter) == -1)
-//		return NULL;
-//
-//	if ((page_ = get_page_ptr(file_head, page_id)) == NULL) {
-//		page_ = alloc_page(bm);
-//		load_page(page_, page_id, file_head);
-//	}
-//
-//	next_row = page_next_row(page_, rowiter);
-//
-//	//next page
-//	if (next_row == NULL) {
-//		//todo sort hot_ 
-//		(*pageiter)++;
-//		return get_next_row(bm, filename, pageiter, rowiter);
-//	}
-//	pf_ = get_frame(page_);
-//	pf_->hot_++;
-//	return next_row;
-//}
+	if (page_id = next_page_id(file_head, pageiter) == -1)
+		return NULL;
 
-// !sorted
+	if ((page_ = file_get_page_by_id(file_head, page_id)) == NULL) {
+		page_ = alloc_page(bm);
+		load_page(page_, page_id, file_head);
+	}
+
+	next_row = page_next_row(page_, rowiter);
+
+	//next page
+	if (next_row == NULL) {
+		//todo sort hot_ 
+		(*pageiter)++;
+		return get_next_row(bm, filename, pageiter, rowiter);
+	}
+	pf_ = get_frame(page_);
+	pf_->hot_++;
+	return next_row;
+}
+
+//!sorted
+
 //void page_fill(Ptr bm, char* filename, VectorIter* rowiter) {
 //	FHead* file_ = find_file_head(bm, filename);
 //	Page* page_ = NULL;

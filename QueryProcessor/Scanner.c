@@ -149,7 +149,7 @@ static Token* get_next_token(char* errmsg,char** ptrsqlstr,int* c_num,int* l_num
 			//token_str -= len_;
 			int token_type;
 			Token *token_ = NULL;
-			if (token_type = dict_get_value(dict, p)) {
+			if (token_type = (int)dict_get_value(dict, p)) {
 				token_ = token_new(NULL, *c_num, *l_num, token_type);
 				//mem_free(token_str);
 			}else {

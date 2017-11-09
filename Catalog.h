@@ -9,7 +9,7 @@
 #define TABLE_GET_NAME(t) (t)->t_info.table_name
 enum Tokentype {
 	CREATE = 1, USE, DATABASE, TABLE, INDEX, UPDATE,
-	NUMBER, TEXT, FLOAT, DATE, DATETIME, TIME, INT, CHAR, BOOL, VARCHAR,
+	NUMBER, TEXT, FLOAT, DATE, DATETIME, TIME, INT, CHAR, VARCHAR,
 	PRIMARY, KEY, FOREIGN, REFERENCES, NULL_, DEFAULT, UNIQUE,
 	LIKE, AND, BETWEEN, OR, IN, EXISTS, DOT,
 	PLUS, SUB, MUL, DIV,
@@ -83,7 +83,7 @@ void table_print(DBnode* db);
 Table* new_table(char* tablename,char* dbname,size_t id);
 void table_del(Table* table);
 int table_match_name(Table* t1, const char* name);
-Column* table_get_col(Table* t, char* colname);
+Column* table_get_col(Table* t, const char* colname);
 void table_add_col(Table* t, Column* col);
 void table_init(Table* table, char* name,
 	size_t id, size_t datalen,

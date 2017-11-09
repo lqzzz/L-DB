@@ -25,7 +25,7 @@ void scanner_test_init(void) {
 void scanner_test(void) {
 	scanner_test_init();
 
-	char* errmsg[100];
+	char errmsg[100];
 	Token* t = scanner(errmsg, &s, &c, &l);
 	Token* c;
 	LIST_FOREACH(c, t,

@@ -1,6 +1,6 @@
 #include "../Mem/MemPool.h"
-#include"Sqlparse.h"`
-#include"../StorageEngine/BufferManager.h"
+#include "Sqlparse.h"`
+#include "../StorageEngine/BufferManager.h"
 QueryNode* new_select_query(void){
 	QueryNode* n = mem_alloc(sizeof(*n));
 	n->type = SELECT;
@@ -38,7 +38,6 @@ DBitems* get_item(char* errmsg,DBnode* db,Token** curr,int flag) {
 	char* col_name;
 
 	if (flag == BASE_ITEM) {
-		char * s;
 		item = new_dbitem();
 		item->base_item = (*curr);
 		NEXT_TOKEN;
@@ -109,7 +108,7 @@ void free_dbitem(DBitems* i) {
 }
 
 void free_dbitem_list(DBitems* h) {
-	LIST_DEL_ALL(&h->head, free_item);
+	LIST_DEL_ALL(&h->head, free_dbitem);
 }
 
 
@@ -128,6 +127,8 @@ int get_item_list(char* errmsg,DBitems** ph, DBnode* db, Token** curr,int flag) 
 }
 
 int check_item(char* errmsg, DBitems* checknode,DBitems* from){
+	if (checknode == NULL)
+		return SQL_OK;
 	if (checknode->base_item)
 		return SQL_OK;
 	Table* t = checknode->table_;
@@ -208,18 +209,18 @@ ERROR:
 }
 
 
-int execute_select(char * errmsg, DBnode * db, JoinNode* sel){
-		
-	return 0;
-}
-
-int execute_get_row(char * errmsg, DBnode * db, JoinNode* j) {
-	if(j->table_)
-		
-
-}
-
-int execute_select(char * errmsg, DBnode * db, JoinNode* sel) {
-
-}
+//int execute_select(char * errmsg, DBnode * db, JoinNode* sel){
+//		
+//	return 0;
+//}
+//
+//int execute_get_row(char * errmsg, DBnode * db, JoinNode* j) {
+//	if(j->table_)
+//		
+//
+//}
+//
+//int execute_select(char * errmsg, DBnode * db, JoinNode* sel) {
+//
+//}
 //int 

@@ -9,7 +9,7 @@ static char sql_insert2[64] = "insert into test_table values(1,'col3')";
 static char sql_insert3[64] = "insert into test_table values(1,'col3',1.22,10)";
 static char sql_insert4[64] = "insert into test_table(col1,col3,col4) values(1,'col3',1.22)";
 static char sql_insert5[64] = "insert into test_table(col1,col2) values(1,'col3',1.22)";
-static char sql_from1[64] = "select col1,col2,col3 from test_table";
+static char sql_from1[64] = "select col1,test_table.col2,col3 from test_table";
 static char* p_sql_from1 = sql_from1;
 static char* p_insert1 = sql_insert1;
 static char* p_insert2 = sql_insert2;
@@ -23,9 +23,14 @@ static char errmsg[128];
 
 static DBnode* test_db;
 static Table* t;
+static Table* t2;
+
 static Column* col1;
 static Column* col2;
 static Column* col3;
+static Column* col4;
+static Column* col5;
+static Column* col6;
 
 void sql_test_init(void) {
 	test_db = database_create("test_db", 0, 0);
@@ -37,6 +42,16 @@ void sql_test_init(void) {
 	table_add_col(t, col2);
 	table_add_col(t, col3);
 	db_add_table(test_db, t);
+
+	t2 = new_table("test_table2", "test", 0);
+	col4 = new_column("col1", "test_table2", "test_db", 0, INT, 4);
+	col5 = new_column("col2", "test_table2", "test_db", 1, CHAR, 16);
+	col6 = new_column("col3", "test_table2", "test_db", 2, FLOAT, 4);
+	table_add_col(t2, col4);
+	table_add_col(t2, col5);
+	table_add_col(t2, col6);
+	db_add_table(test_db, t2);
+
 	new_bufferManager(test_db);
 	init_key_word();
 }
@@ -101,22 +116,44 @@ static void insert_test(void) {
 	//EXPECT_EQ_STR("col3", row + sizeof(int));
 
 	//free node
-	
 }
 
 static from_test(void) {
+	static char sql[100] = "select * from test_table,test_table2";
+	static char* p_ = sql;
 	int cnum = 0;
 	int lnum = 0;
+	int c = 0, l = 0;
 	QueryNode* node1 = NULL;
 	QueryNode* node2 = NULL;
 	QueryNode* node3 = NULL;
 	QueryNode* node4 = NULL;
 	Token* t1 = scanner(errmsg, &p_sql_from1, &cnum, &lnum);
+	Token* t2 = scanner(errmsg, &p_, &c, &l);
 
-	sql_parse(errmsg, test_db, t, &node1);
+	sql_parse(errmsg, test_db, t1, &node1);
 
-	EXPECT_EQ_INT(FROM, node1->type);
+	EXPECT_EQ_INT(SELECT, node1->type);
+	
+	EXPECT_EQ_STR("test_table",
+	node1->select_node->from_items->table_->t_info.table_name);
 
+	EXPECT_EQ_STR("col1",
+	node1->select_node->select_items->col_->column_name);
+
+	DBitems* next = node1->select_node->select_items->head.next_;
+
+	EXPECT_EQ_STR("col2", next->col_->column_name);
+	EXPECT_EQ_STR("test_table", 
+		next->table_->t_info.table_name);
+
+	sql_parse(errmsg, test_db, t2, &node2);
+
+	EXPECT_EQ_STR("test_table",node2->select_node->join->
+		left->table_->t_info.table_name);
+	EXPECT_EQ_STR("test_table2",node2->select_node->join->
+		right->table_->t_info.table_name);
+	//puts(errmsg);
 }
 
 void sqltest(void) {
@@ -124,4 +161,5 @@ void sqltest(void) {
 	c_db_test();
 	c_table_test();
 	insert_test();
+	from_test();
 }
