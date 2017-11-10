@@ -36,13 +36,14 @@ typedef struct{
 }FileHeadData;
 
 typedef struct {
-
-	Vector mem_page_bit_map;
-	Vector rows;
+	Listhead head;
+	//Vector mem_page_bit_map;
+	//Vector rows;
 	char* filename_;
 	FileHeadData* filehead;
 	char* page_states;
 	Vector* cols;
+	Page* mem_page_bit_map[PageCount];
 }FHead;
 
 FileHeadData* new_file_head_data(size_t pagecount,
@@ -51,7 +52,6 @@ FHead* new_file_head(char* filename, FileHeadData* fhd);
 void write_file_head(const FHead* fh);
 FHead* read_file_head(const char* filename, size_t rowlen, size_t rowslotcount);
 void init_file(FHead* fh);
-char* file_get_row(FHead* fh, size_t pageid, size_t rowindex);
 int file_add_row(FHead* fh, size_t pageid, size_t rowindex,const char* row);
 
 Page* new_page(size_t rowlen, size_t slot_count);
@@ -61,9 +61,12 @@ void page_init(Page* p, size_t rowlen, size_t slot_count);
 int page_add_row(Page* p, size_t slot_index, const char* row);
 void pagedata_init(PageData* pd);
 void page_del(FHead* f, Page* p);
+
+char* file_get_row(FHead* fh, size_t pageid, size_t rowindex);
 char* page_get_row(const Page* p, size_t index);
 
-Page* file_get_page_by_id(FHead* p, size_t pageid);
+Page* file_get_page(FHead* p, size_t pageid);
+
 int file_get_not_full_page_id(const FHead* p);
 void set_page_full_state(FHead* p, int id,char state);
 char* get_file_name(const FHead* p);

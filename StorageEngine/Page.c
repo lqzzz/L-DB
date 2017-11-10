@@ -2,7 +2,6 @@
 #include"../Mem/MemPool.h"
 #include"Page.h"
 
-//static DictType dt = { NULL,NULL,NULL,NULL,NULL,dict_int_hashfunction };
 __inline int page_has_next(FHead* p, size_t index) {
 	return index == p->filehead->page_count ? P_ERROR : P_OK;
 }
@@ -65,8 +64,10 @@ void init_file(FHead *fh){
 	fclose(f);
 }
 
-char * file_get_row(FHead* fh, size_t pageid, size_t rowindex){
-	return page_get_row(file_get_page_by_id(fh, pageid), rowindex);
+char* file_get_row(FHead* fh, size_t pageid, size_t rowindex){
+	Page* p;
+	return p = file_get_page_by_id(fh, pageid) ?
+		page_get_row(p, rowindex) : NULL;
 }
 
 int file_add_row(FHead* fh, size_t pageid, size_t rowindex,const char* row){
@@ -83,12 +84,12 @@ int file_add_row(FHead* fh, size_t pageid, size_t rowindex,const char* row){
 }
 
 FHead* new_file_head(char* filename, FileHeadData* fhd){
-	FHead* fh = mem_alloc(sizeof(*fh));
-	//
+	FHead* fh = mem_calloc(1,sizeof(*fh));
+	LIST_INIT(&fh->head);
 	fh->filename_ = filename;
-	VECTOR_INIT_LEN(&fh->mem_page_bit_map, PageCount);
 	fh->filehead = fhd;
 	fh->page_states = fhd->page_state_head;
+	//memset(fh->mem_page_bit_map, 0, PageCount*size_t);
 	return fh;
 }
 
@@ -159,27 +160,24 @@ char * get_file_name(FHead* p){
 int next_page_id(const FHead* p, size_t* index) {
 	if (page_has_next(p, *index) == P_ERROR);
 		return P_ERROR;
-	if (p->filehead->page_state_head[*index] == P_EMPTY) {
+	if (p->page_states[*index] == P_EMPTY) {
 		++(*index);
 		return next_page_id(p, index);
 	}
 	return *index;
 }
 
-Page* file_get_page_by_id(FHead* f ,size_t pageid) {
-	Page* p;
-	if((p=VECTOR_GET_VALUE()))
-	if ((p = dict_get_value(f->page_id_map, pageid)))
-		return p;
+int page_state(FHead* f, size_t pid) {
+		
+}
 
-	p = new_page(f->filehead->row_len, 
-		f->filehead->row_slot_count);
-	load_page(p, pageid, f);
-	return p;
+Page* file_get_page(FHead* f ,size_t pageid) {
+	return page_has_next(f, pageid) == P_ERROR ? NULL :
+		f->mem_page_bit_map[pageid];
 }
 
 void set_page_full_state(FHead* p, int id,char state){
-	p->filehead->page_state_head[id] = state;
+	p->page_states[id] = state;
 }
 
 void page_init(Page* p,size_t rowlen, size_t slot_count){
