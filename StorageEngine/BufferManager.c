@@ -1,6 +1,4 @@
 #include "../BaseStruct/Listhead.h"
-#include "../Catalog.h"
-#include "../BaseStruct/Vector.h"
 #include "BufferManager.h"
 #include "Page.h"
 
@@ -28,14 +26,17 @@ typedef struct bm* Ptr;
 
 static Ptr bm_list_head = NULL;
 
-static FPtr new_pageframe(const char* tablename);
+static FPtr new_pageframe(size_t rowlen, size_t rowslotcount);
+
+__inline static FHead* find_file_head(Ptr bm, const char* filename);
+__inline static FPtr get_frame(Page* page);
 __inline static FHead* find_file_head(Ptr bm, const char* filename);
 
 Ptr get_bm_head(void) {
 	return bm_list_head;
 }
 
-static FPtr get_frame(Page* page) {
+FPtr get_frame(Page* page) {
 	return (FPtr)((char*)page - (sizeof(struct PageFrame) - sizeof(Page)));
 }
 
@@ -50,7 +51,7 @@ FPtr new_pageframe(size_t rowlen,size_t rowslotcount) {
 	return fp;
 }
 
-__inline static FHead* find_file_head(Ptr bm,const char* filename) {
+FHead* find_file_head(Ptr bm,const char* filename) {
 	FHead* file_head = NULL;
 	char flag = 0;
 	LIST_FOREACH(file_head, &bm->file_head_list,
@@ -60,10 +61,6 @@ __inline static FHead* find_file_head(Ptr bm,const char* filename) {
 		}
 	);
 	return flag ? file_head : NULL;
-}
-
-void add_bm(DBnode* db) {
-
 }
 
 void new_bufferManager(DBnode* db) {
@@ -79,18 +76,7 @@ void bm_add_raw_file_head(Ptr bm, FHead* filehead) {
 	LIST_ADD_TAIL(&bm->file_head_list->head, &filehead->head);
 }
 
-char* buf_get_row(BufferManager* bm, const char* filename, int* pid, int* rid){
-	FHead* fh;
-	return fh = find_file_head(bm, filename) ?
-		file_get_row(fh, *pid, *rid) : NULL;
-}
-
-char* scan_table(char* tablename, int* pid, int* rid){
-	
-	return NULL;
-}
-
-char* get_next_row(Ptr bm, char* filename, size_t *pageiter, size_t *rowiter) {
+char* get_next_row(BufferManager* bm, const char* filename, size_t *pageiter, size_t *rowiter) {
 	FHead* file_head;
 	Page* page_;
 	FPtr pf_;
@@ -109,39 +95,39 @@ char* get_next_row(Ptr bm, char* filename, size_t *pageiter, size_t *rowiter) {
 		load_page(page_ = &pf_->page_, page_id, file_head);
 	}
 
-	next_row = page_next_row(page_, rowiter);
-
 	//next page
-	if (next_row == NULL) {
+	if ((next_row = page_next_row(page_, rowiter)) == NULL) {
 		//todo sort hot_ 
 		(*pageiter)++;
+		*rowiter = 0;
 		return get_next_row(bm, filename, pageiter, rowiter);
+	}else {
+		pf_ = get_frame(page_);
+		pf_->hot_++;
+		return next_row;
 	}
-	pf_ = get_frame(page_);
-	pf_->hot_++;
-	return next_row;
 }
 
-//!sorted
-
-//void page_fill(Ptr bm, char* filename, VectorIter* rowiter) {
-//	FHead* file_ = find_file_head(bm, filename);
-//	Page* page_ = NULL;
-//	while (vector_has_next(rowiter)) {
-//		int page_id = get_not_full_page_id(file_);
-//		//todo page_id = -1;
-//		if ((page_ = get_page_ptr(file_, page_id)) == NULL) {
-//			page_ = alloc_page(bm);
-//			load_page(page_, page_id, file_);
-//		}
-//		if (page_add_row(page_, rowiter) == 1) 
-//			set_page_full_state(file_, page_id, 1);
-//		FPtr frame_ = get_frame(page_);
-//		frame_->is_dirty = 1;
-//		frame_->hot_++;
-//	}
-//	//store_page(page_, file_);
-//}
+void page_fill(Ptr bm, char* filename, char* row) {
+	FHead* file_ = find_file_head(bm, filename);
+	Page* page_;
+	FPtr frame_;
+	int page_id = file_get_not_full_page_id(file_);
+	//todo page_id = -1;
+	if ((page_ = file_get_page(file_, page_id)) == NULL) {
+		frame_ = new_pageframe(file_->filehead->row_len,
+			file_->filehead->row_slot_count);
+		page_ = &frame_->page_;
+		LIST_ADD_TAIL(&bm->lru_page_list->head, &frame_->head);
+		load_page(file_, page_id, page_);
+	}
+	if (page_add_row(page_, rowiter) == 1)
+		set_page_full_state(file_, page_id, 1);
+	frame_ = get_frame(page_);
+	frame_->is_dirty = 1;
+	frame_->hot_++;
+	//store_page(page_, file_);
+}
 
 Ptr get_buffman(int DBid){
 	Ptr bm_ = NULL;

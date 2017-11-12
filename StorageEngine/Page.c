@@ -107,7 +107,7 @@ FHead* read_file_head(const char* filename,size_t rowlen,size_t rowslotcount) {
 	return new_file_head(filename, fhd);
 }
 
-int load_page(Page* page,int id,FHead* p){
+int load_page(FHead* p,size_t id,Page* page){
 	FILE* fd_;
 
 	fd_ = fopen(p->filename_, "rb");
@@ -121,7 +121,7 @@ int load_page(Page* page,int id,FHead* p){
 	fread(&page->pdata, PageSize, 1, fd_);
 
 	fclose(fd_);
-	//dict_add_entry(p->page_id_map, page->pdata.page_id, page);
+	p->mem_page_bit_map[id] = page;
 	return 1;
 }
 
@@ -140,7 +140,7 @@ int store_page(Page* page,FHead* p){
 }
 
 int file_get_not_full_page_id(FHead* f) {
-	char* page_state_head = f->filehead->page_state_head;
+	char* page_state_head = f->page_states;
 	size_t page_count = f->filehead->page_count;
 	int page_id = -1;
 	
@@ -222,32 +222,21 @@ int page_add_row(Page* p, size_t slot_index,const char* row) {
 
 	memcpy(prow, row, p->row_len);
 
-	//puts(prow);
-
 	p->slot_state_head_ptr[slot_index] = P_NOT_EMPTY;
 	p->pdata.used_slot_size++;
-
-	//for (size_t i = 0; i < p->slot_count; i++) {
-	//	char s = p->slot_state_head_ptr[i];
-	//	if (s == P_EMPTY)
-	//		printf("%d", 0);
-	//	else printf("%c", s);
-	//}
-	//printf("\n");
 
 	return P_OK;
 }
 
-
-
 char* page_next_row(const Page* p,size_t* rowiter) {
 	if (row_has_next(p, *rowiter) == P_ERROR)
 		return NULL;
+
 	if (p->slot_state_head_ptr[*rowiter] == P_EMPTY) {
 		++(*rowiter);
 		return page_next_row(p, rowiter);
 	}
-	size_t offset = (*rowiter)++ * p->row_len;
-	return p->rows_head + offset;
+
+	return p->rows_head + (*rowiter)++ * p->row_len;
 }
 

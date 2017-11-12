@@ -55,7 +55,7 @@ void init_file(FHead* fh);
 int file_add_row(FHead* fh, size_t pageid, size_t rowindex,const char* row);
 
 Page* new_page(size_t rowlen, size_t slot_count);
-int load_page(Page* p, int index, FHead* fh);
+int load_page(FHead* p, size_t id, Page* page);
 int store_page(Page*, FHead*);
 void page_init(Page* p, size_t rowlen, size_t slot_count);
 int page_add_row(Page* p, size_t slot_index, const char* row);
