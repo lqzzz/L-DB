@@ -236,7 +236,7 @@ char* page_next_row(const Page* p,size_t* rowiter) {
 		++(*rowiter);
 		return page_next_row(p, rowiter);
 	}
-
+	int a = 0;
 	return p->rows_head + (*rowiter)++ * p->row_len;
 }
 
