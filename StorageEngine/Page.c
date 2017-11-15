@@ -70,18 +70,18 @@ char* file_get_row(FHead* fh, size_t pageid, size_t rowindex){
 		page_get_row(p, rowindex) : NULL;
 }
 
-int file_add_row(FHead* fh, size_t pageid, size_t rowindex,const char* row){
-	if(fh->page_states[pageid] == P_FULL)
-		return P_ERROR;
-
-	Page* p = file_get_page_by_id(fh, pageid);
-
-	if (page_add_row(p,rowindex,row) == P_ERROR)
-		return P_ERROR;
-	if (p->pdata.used_slot_size == p->slot_count)
-		fh->page_states[pageid] = P_FULL;
-	return P_OK;
-}
+//int file_add_row(FHead* fh, size_t pageid, size_t rowindex,const char* row){
+//	if(fh->page_states[pageid] == P_FULL)
+//		return P_ERROR;
+//
+//	Page* p = file_get_page_by_id(fh, pageid);
+//
+//	if (page_add_row(p,rowindex,row) == P_ERROR)
+//		return P_ERROR;
+//	if (p->pdata.used_slot_size == p->slot_count)
+//		fh->page_states[pageid] = P_FULL;
+//	return P_OK;
+//}
 
 FHead* new_file_head(char* filename, FileHeadData* fhd){
 	FHead* fh = mem_calloc(1,sizeof(*fh));
@@ -171,28 +171,35 @@ int page_state(FHead* f, size_t pid) {
 		
 }
 
-Page* file_get_page(FHead* f ,size_t pageid) {
-	return page_has_next(f, pageid) == P_ERROR ? NULL :
-		f->mem_page_bit_map[pageid];
+Page* file_get_mem_page(FHead* f ,size_t pageid) {
+	if (pageid >= f->filehead->page_count)
+		return P_ERROR;
+	Page *p;
+	if (p = f->mem_page_bit_map[pageid])
+		return p;
+}
+
+Page* file_get_new_page(FHead* f ,size_t pageid) {
+	Page *p = new_page(f->filehead->row_len, f->filehead->row_slot_count);
+	load_page(f, pageid, p);
+	f->mem_page_bit_map[pageid] = p;
+	return p;
 }
 
 void set_page_full_state(FHead* p, int id,char state){
 	p->page_states[id] = state;
 }
 
-void page_init(Page* p,size_t rowlen, size_t slot_count){
+Page* new_page(size_t rowlen, size_t slot_count){
+	Page* p = mem_alloc(sizeof(Page) - 
+		sizeof(PageData) + PageSize);
+	LIST_INIT(&p->head);
 	p->row_len = rowlen;
 	p->slot_count = slot_count;
 	p->slot_state_head_ptr = p->pdata.row_set;
 	p->rows_head = p->pdata.row_set + slot_count * sizeof(char);
 	//p->slot_state_head_ptr = &p->pdata.s;
 	//p->rows_head = p->pdata.row_set;
-}
-
-Page* new_page(size_t rowlen, size_t slot_count){
-	Page* p = mem_alloc(sizeof(Page) - 
-		sizeof(PageData) + PageSize);
-	page_init(p, rowlen, slot_count);
 	return p;
 }
 
@@ -204,27 +211,53 @@ void page_del(FHead* f, Page* p){
 	//dict_del_entry_nofree(f->page_id_map, p->pdata.page_id);
 }
 
+int page_add_row(Page* p, const char* row,int index){
+	//if (index >= p->slot_count)
+	//	return P_ERROR;
+	//if (p->slot_state_head_ptr[index] == P_NOT_EMPTY)
+	//	return page_add_row(p, row, index++);
+	
+	size_t offset = index* p->row_len;
+
+	char* prow = p->rows_head + offset;
+
+	memcpy(prow, row, p->row_len);
+	p->pdata.used_slot_size++;
+	p->slot_state_head_ptr[index] = P_NOT_EMPTY;
+	return P_OK;
+}
+
+int page_get_free_slot(Page * p){
+	for (int index = 0; p->slot_count; index++) {
+		if (p->slot_state_head_ptr[index] = P_EMPTY)
+			return index;
+	}
+	return P_ERROR;
+}
+
 char * page_get_row(Page * p, size_t index){
 	return p->slot_state_head_ptr[index] == P_EMPTY ? NULL :
 		p->rows_head + index * p->row_len;
 }
 
-int page_add_row(Page* p, size_t slot_index,const char* row) {
-	if (slot_index >= p->slot_count) 
+int file_add_row(FHead* f,const char* row) {
+	int pid;
+	if (pid = file_get_not_full_page_id(f) == -1)
 		return P_ERROR;
 
 	if (p->slot_state_head_ptr[slot_index] == P_NOT_EMPTY)
-		return P_ERROR;
+		return file_add_row(f,p, slot_index++, row);
 
 	size_t offset = slot_index* p->row_len;
 
 	char* prow = p->rows_head + offset;
 
 	memcpy(prow, row, p->row_len);
-
 	p->slot_state_head_ptr[slot_index] = P_NOT_EMPTY;
-	p->pdata.used_slot_size++;
-
+	
+	if (++p->pdata.used_slot_size == p->slot_count)
+		f->page_states[p->pdata.page_id] = P_FULL;
+		
 	return P_OK;
 }
 
@@ -236,7 +269,6 @@ char* page_next_row(const Page* p,size_t* rowiter) {
 		++(*rowiter);
 		return page_next_row(p, rowiter);
 	}
-	int a = 0;
 	return p->rows_head + (*rowiter)++ * p->row_len;
 }
 
