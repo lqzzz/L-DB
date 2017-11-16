@@ -41,7 +41,7 @@ typedef struct query QueryNode;
 
 typedef struct {
 	Listhead head;
-
+	int is_tab_col;
 	Table* table_;
 	Column* col_;
 	char* col_name;
@@ -64,12 +64,13 @@ typedef struct insert{
 }InsertNode;
 
 typedef struct join{
+	int is_join;
 	Table* table_;
 	JoinNode *left, *right;
-	obj* row_obj;
-	FHead* file;
+	Page* page_;
 	int pid;
 	int rid;
+	WhereNode* condition;
 }JoinNode;
 
 typedef struct condition{
@@ -111,7 +112,7 @@ QueryNode* new_insert_query(void);
 QueryNode* new_select_query(void);
 InsertNode* new_insert_node(void);
 SelectNode* new_select_node(void);
-JoinNode* new_join_node(Table* t);
+JoinNode* new_join_node(const Table* table);
 JoinNode* join_lr(JoinNode* left, JoinNode* right);
 
 DBitems* new_dbitem();

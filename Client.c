@@ -8,6 +8,7 @@ void process_command(Client* c){
 
 	}
 
-	//sql_parse(c->errmsg,)
+	sql_parse(c->errmsg, NULL, c->token_head, &c->quenode);
 
+	
 }

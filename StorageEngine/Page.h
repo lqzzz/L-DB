@@ -66,7 +66,7 @@ void page_init(Page* p, size_t rowlen, size_t slot_count);
 //int page_add_row(Page* p, size_t slot_index, const char* row);
 void pagedata_init(PageData* pd);
 void page_del(FHead* f, Page* p);
-int page_add_row(Page* p, const char* row,int index);
+int page_add_row(Page* p,int index, const char* row);
 int page_get_free_slot(Page* p);
 
 char* file_get_row(FHead* fh, size_t pageid, size_t rowindex);
@@ -79,6 +79,7 @@ int file_get_not_full_page_id(const FHead* p);
 void set_page_full_state(FHead* p, int id,char state);
 char* get_file_name(const FHead* p);
 
+int get_row_index(Page* p, size_t rowindex);
 char* page_next_row(const Page* page, size_t *rowiter);
 int next_page_id(const FHead* filehead, size_t* pageid);
 

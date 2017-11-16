@@ -1,4 +1,5 @@
 #include"Sqlparse.h"
+#include"../StorageEngine/BufferManager.h"
 
 //typedef struct insert{
 //	DBitems *set_cols, *insert_items, *table_item;
@@ -42,33 +43,6 @@ int parse_insert_values(char* errmsg, DBnode* db, InsertNode* insertnode, Token*
 
 	DBitems* baseitem = insertnode->insert_fields;
 	Column* col;
-
-	//DBitems* currnode;
-	//Listhead *_list_head = insertnode->set_cols;
-	//Listhead *_curr = insertnode->set_cols;
-
-	//do {
-	//	currnode = _curr;
-	//	col = currnode->col_;
-	//	enum TokenType itemtype = baseitem->base_item->token_type;
-	//	enum TokenType datatype = col->column_data_type;
-
-	//	if (!((datatype == itemtype) ||
-	//		itemtype == TEXT && datatype == CHAR))
-	//		PARSE_ERROR("数据类型不匹配");
-
-	//	size_t offset = col->column_rec_offset;
-	//	char* item_ = baseitem->base_item->value_;
-
-	//	if (itemtype == INT)
-	//		*(int*)(row_ + offset) = item_;
-	//	else if (itemtype == FLOAT) 
-	//		*(float*)(row_ + offset) = *(float*)(&item_);
-	//		//memcpy(row_ + offset, &item_, sizeof(float));
-	//	else
-	//		memcpy(row_ + offset, item_, strlen(item_));
-	//	LIST_MOVE_NEXT(&baseitem);
-	//} while ((LIST_MOVE_NEXT(&_curr)) != _list_head);
 
 	char* item_;
 	DBitems* dbitem;
@@ -148,6 +122,12 @@ int parse_insert(char* errmsg,DBnode* db, Token** curr,QueryNode** pnode) {
 	return SQL_OK;
 ERROR:
 	return SQL_ERROR;
+}
+
+int execute_insert(DBnode* db, InsertNode* insert) {
+	BufferManager* bm = get_buffman(db->id_);
+	buf_insert(bm, insert->table_item->table_->t_info.table_name, insert->insert_row);
+	return SQL_OK;
 }
 
 	//int fill_rec_count = 0;

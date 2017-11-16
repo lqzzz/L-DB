@@ -19,8 +19,8 @@ static void page_next_test(FHead* f) {
 }
 
 static void page_test_add_row(FHead* f) {
-	Page* ps = file_get_page_by_id(f, 0);
-	Page* pd = file_get_page_by_id(f, 3);
+	Page* ps = file_get_new_page(f, 0);
+	Page* pd = file_get_new_page(f, 3);
 	page_add_row(ps, 0, "ps r1");
 	page_add_row(ps, 25, "ps r26");
 	page_add_row(ps, 26, "ps r27");
@@ -35,13 +35,22 @@ static void page_test_add_row(FHead* f) {
 	EXPECT_EQ_STR(page_get_row(pd,25), "pd r26");
 	EXPECT_EQ_STR(page_get_row(pd,26), "pd r27");
 
+	ps = file_get_mem_page(f, 0);
+	pd = file_get_mem_page(f, 3);
+	EXPECT_EQ_STR(page_get_row(ps,0), "ps r1");
+	EXPECT_EQ_STR(page_get_row(ps,25), "ps r26");
+	EXPECT_EQ_STR(page_get_row(ps,26), "ps r27");
+	EXPECT_EQ_STR(page_get_row(pd,0), "pd r1");
+	EXPECT_EQ_STR(page_get_row(pd,25), "pd r26");
+	EXPECT_EQ_STR(page_get_row(pd,26), "pd r27");
 	store_page(ps, f);
 	store_page(pd, f);
 	page_del(f, ps);
 	page_del(f, pd);
+	EXPECT_EQ_INT(NULL,file_get_mem_page(f, 0));
 
-	ps = file_get_page_by_id(f, 0);
-	pd = file_get_page_by_id(f, 3);
+	ps = file_get_new_page(f, 0);
+	pd = file_get_new_page(f, 3);
 	EXPECT_EQ_STR(page_get_row(ps,0), "ps r1");
 	EXPECT_EQ_STR(page_get_row(ps,25), "ps r26");
 	EXPECT_EQ_STR(page_get_row(ps,26), "ps r27");

@@ -5,13 +5,6 @@
 #define DIRTY 1
 #define NOT_DIRTY 0
 
-struct PageFrame{
-	Listhead head;
-	int16_t is_dirty;
-	int32_t hot_;
-	Page page_;
-};
-
 struct bm {
 	Listhead bm_list;
 	int DB_id;
@@ -64,49 +57,41 @@ void new_bufferManager(DBnode* db) {
 	Ptr bm_ = mem_alloc(sizeof(*bm_));
 	bm_->DB_id = db->id_;
 	LIST_INIT(&bm_->bm_list);
+	bm_->file_head_list = NULL;
+
 	if (bm_list_head == NULL)
 		bm_list_head = bm_;
 	else LIST_ADD_TAIL(&bm_list_head->bm_list, &bm_->bm_list);
 }
 
-void bm_add_raw_file_head(Ptr bm, FHead* filehead) {
+void bm_add_raw_file_head(int DBid, FHead* filehead) {
+	BufferManager* bm = get_buffman(DBid);
 	if (bm->file_head_list == NULL)
 		bm->file_head_list = filehead;
 	else LIST_ADD_TAIL(&bm->file_head_list->head, &filehead->head);
 }
 
-//char* get_next_row(BufferManager* bm, const char* filename, size_t *pageiter, size_t *rowiter) {
-//	if (*pageiter > PageCount)
-//		return NULL;
-//	FHead* file_head = find_file_head(bm, filename);
-//	size_t page_id;
-//	if ((page_id = next_page_id(file_head, pageiter)) == P_ERROR)
-//		return NULL;
-//
-//	Page* page_;
-//
-//	if ((page_ = file_get_mem_page(file_head, page_id)) == NULL) {
-//		//
-//		page_ = file_get_new_page(file_head, page_id);
-//		if (bm->p_lru_list == NULL)
-//			bm->p_lru_list = page_;
-//		else LIST_ADD_TAIL(&bm->p_lru_list->head, &page_->head);
-//	}
-//	char* next_row;
-//	//next page
-//	if ((next_row = page_next_row(page_, rowiter)) == NULL) {
-//		//todo sort hot_ 
-//		(*pageiter)++;
-//		*rowiter = 0;
-//		return get_next_row(bm, filename, pageiter, rowiter);
-//	}else {
-//		page_->hot_++;
-//		return next_row;
-//	}
-//}
-//
+Page* buf_get_page(BufferManager* bm, const char* filename, int pid) {
+	if (pid > PageCount)
+		return NULL;
+	FHead* file_head = find_file_head(bm, filename);
 
-int page_fill(Ptr bm, const char* filename,const char* row) {
+	Page* page_;
+
+	if ((page_ = file_get_mem_page(file_head, pid)) == NULL) {
+		//
+		page_ = file_get_new_page(file_head, pid);
+		if (bm->p_lru_list == NULL)
+			bm->p_lru_list = page_;
+		else LIST_ADD_TAIL(&bm->p_lru_list->head, &page_->head);
+	}
+	page_->hot_++;
+	return page_;
+
+}
+
+
+int buf_insert(BufferManager* bm, const char* filename, const char* row){
 	FHead* file_ = find_file_head(bm, filename);
 
 	int page_id = file_get_not_full_page_id(file_);
@@ -115,7 +100,7 @@ int page_fill(Ptr bm, const char* filename,const char* row) {
 
 	int slot_index = page_get_free_slot(page_);
 
-	page_add_row(page_, row, slot_index);
+	page_add_row(page_, slot_index, row);
 
 	if (page_->slot_count == page_->pdata.used_slot_size)
 		file_->page_states[page_id] = P_FULL;

@@ -104,7 +104,7 @@ int read_table_info(void) {
 			TableInfo *info = &t->t_info;
 			DBnode* db_ = DBNODE_SEARCH(dbhead, info->table_db_name);
 
-			bm_add_file_head(db_->id_,
+			bm_add_raw_file_head(db_->id_,
 				read_file_head(info->table_name,
 				info->table_data_len,info->table_page_solt_count));
 

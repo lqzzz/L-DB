@@ -135,6 +135,35 @@ Table* new_table(char* tablename,char* dbname,size_t id){
 	return t;
 }
 
+Table* new_join_table(Table* l, Table* r){
+	Table* t = new_table("", l->t_info.table_db_name, 0);
+	TableInfo* il = &l->t_info;
+	TableInfo* ir = &r->t_info;
+	TableInfo* jr = &t->t_info;
+	jr->table_auto_increment =
+		il->table_auto_increment + ir->table_auto_increment;
+	jr->table_col_count = il->table_col_count + ir->table_col_count;
+	jr->table_data_len = il->table_data_len + ir->table_data_len;
+	jr->table_rec_size = 0;
+	jr->table_page_solt_count = 0;
+	Column* col;
+	Column* new_col;
+	VECTOR_FOREACH(col, &l->cols,
+		new_col = mem_alloc(sizeof(Column));
+		*new_col = *col;
+		table_add_col(t, new_col);
+		);
+
+	VECTOR_FOREACH(col, &r->cols,
+		new_col = mem_alloc(sizeof(Column));
+		*new_col = *col;
+		new_col->column_rec_offset += il->table_data_len;
+		new_col->column_num += il->table_col_count;
+		table_add_col(t, new_col);
+		);
+	return t;
+}
+
 
 void table_init(Table* table, char * name, size_t id, size_t datalen, size_t columncount, size_t recsize, size_t pageslotcount){
 	TableInfo* info = &table->t_info;

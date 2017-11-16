@@ -8,16 +8,18 @@ QueryNode* new_select_query(void){
 	return n;
 }
 
-JoinNode* new_join_node(Table* t){
+JoinNode* new_join_node(const Table* table){
 	JoinNode* n = mem_calloc(1,sizeof(JoinNode));
-	n->table_ = t;
+	n->table_ = table;
 	return n;
 }
 
-JoinNode * join_lr(JoinNode* left, JoinNode* right){
+JoinNode* join_lr(JoinNode* left, JoinNode* right){
 	JoinNode* n = mem_calloc(1, sizeof(JoinNode));
 	n->left = left;
 	n->right = right;
+	n->is_join = 1;
+	n->table_ = new_join_table(left->table_, right->table_);
 	return n;
 }
 
@@ -40,6 +42,7 @@ DBitems* get_item(char* errmsg,DBnode* db,Token** curr,int flag) {
 	if (flag == BASE_ITEM) {
 		item = new_dbitem();
 		item->base_item = (*curr);
+		item->is_tab_col = 0;
 		NEXT_TOKEN;
 		return item;
 	}
@@ -54,6 +57,7 @@ DBitems* get_item(char* errmsg,DBnode* db,Token** curr,int flag) {
 			QUERY_ERROR("表名 %s 无效\n", table_name);
 		item = new_dbitem();
 		item->table_ = t;
+		item->is_tab_col = 1;
 		return item;
 	}
 
@@ -75,6 +79,7 @@ DBitems* get_item(char* errmsg,DBnode* db,Token** curr,int flag) {
 		item = new_dbitem();
 		item->table_ = t;
 		item->col_ = col;
+		item->is_tab_col = 1;
 		return item;
 	}
 
@@ -83,6 +88,7 @@ DBitems* get_item(char* errmsg,DBnode* db,Token** curr,int flag) {
 
 	item = new_dbitem();
 	item->col_name = col_name;
+	item->is_tab_col = 1;
 	return item;
 ERROR:
 	return NULL;

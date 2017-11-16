@@ -14,7 +14,7 @@ int parse_create(char* errmsg,DBnode* dbnode, Token** curr) {
 			table_->t_info.table_data_len);
 		FHead* fh = new_file_head(table_->t_info.table_name, fhd);
 		init_file(fh);
-		bm_add_file_head(dbnode->id_, fh);
+		bm_add_raw_file_head(dbnode->id_, fh);
 
 		return SQL_OK;
 	case DATABASE:

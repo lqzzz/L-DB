@@ -7,6 +7,8 @@
 
 #define DBNODE_SEARCH(head,key) list_search(head,key,db_match_name)
 #define TABLE_GET_NAME(t) (t)->t_info.table_name
+#define TABLE_GET_DATA_LEN(t) (t)->t_info.table_data_len
+
 enum Tokentype {
 	CREATE = 1, USE, DATABASE, TABLE, INDEX, UPDATE,
 	NUMBER, TEXT, FLOAT, DATE, DATETIME, TIME, INT, CHAR, VARCHAR,
@@ -81,6 +83,7 @@ void db_print(DBnode* dbh);
 
 void table_print(DBnode* db);
 Table* new_table(char* tablename,char* dbname,size_t id);
+Table* new_join_table(Table* l, Table* r);
 void table_del(Table* table);
 int table_match_name(Table* t1, const char* name);
 Column* table_get_col(Table* t, const char* colname);
@@ -91,7 +94,8 @@ void table_init(Table* table, char* name,
 	size_t pageslotcount);
 //void table_print(Table* t);
 
-Column* new_column(char* colname, char* tablename, char*dbname, size_t id,enum TokenType DT,size_t datalen);
+Column* new_column(char* colname, char* tablename, char*dbname, 
+	size_t id,enum TokenType DT,size_t datalen);
 int col_match_name(Column* col1,const char* name);
 void col_del(Column* col);
 size_t get_max_data_len(void* item,enum Tokentype datatype,size_t currmaxlen);
