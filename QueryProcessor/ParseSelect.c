@@ -103,8 +103,13 @@ int execute_where(char* row,int ref, DBnode* db, WhereNode* con) {
 		con->operator_ == GREATERTHAN ||
 		con->operator_ == GREATER_OR_EQ ||
 		con->operator_ == LESSTHAN ||
-		con->opand == LESS_OR_EQ)
-	con->
+		con->opand == LESS_OR_EQ) {
+
+		if (con->left->opand->is_tab_col) {
+			con->left->opand->table_;
+		}
+
+	}
 }
 
 int fliter_row(WhereNode* con, char* row) {
