@@ -62,7 +62,7 @@ int parse_select(char* errmsg,DBnode* db, Token** curr,QueryNode** qnode){
 		if ((sel_node->condition = parse_where(errmsg, db, curr, sel_node->from_items)) == NULL)
 			goto ERROR;
 	}
-	ss
+	int a;
 	return SQL_OK;
 ERROR:
 	return SQL_ERROR;
