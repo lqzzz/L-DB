@@ -51,7 +51,6 @@ void sql_test_init(void) {
 	table_add_col(t2, col5);
 	table_add_col(t2, col6);
 	db_add_table(test_db, t2);
-
 	new_bufferManager(test_db);
 	init_key_word();
 }
@@ -156,10 +155,31 @@ static from_test(void) {
 	//puts(errmsg);
 }
 
+void where_test() {
+	static char sql[100] = "select* from test_table,test_table2 where col1 = test_table2.col2";
+	static char* p_ = sql;
+	int cnum = 0, lnum = 0;
+
+	QueryNode* node1 = NULL;
+	Token* t1 = scanner(errmsg, &p_, &cnum, &lnum);
+	sql_parse(errmsg, test_db, t1, &node1);
+	puts(errmsg);
+
+	//EXPECT_EQ_INT(EQUAL, 
+	//	node1->select_node->condition->operator_);
+	//EXPECT_EQ_INT(0, 
+	//	node1->select_node->condition->res_type);
+	//EXPECT_EQ_STR("test_table",
+	//	node1->select_node->condition->left->opand->table_->t_info.table_name);
+	//EXPECT_EQ_STR("col1",
+	//	node1->select_node->condition->left->opand->col_->column_name);
+}
+
 void sqltest(void) {
 	sql_test_init();
 	c_db_test();
 	c_table_test();
 	insert_test();
 	from_test();
+	//where_test();
 }

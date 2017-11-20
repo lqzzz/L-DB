@@ -31,7 +31,7 @@ void free_where(WhereNode* n) {
 	free_where(n->left);
 	free_where(n->right);
 	free_dbitem(n->opand);
-	free_where(n);
+	mem_free(n);
 }
 
 WhereNode* parse_where(char* errmsg,DBnode* db, Token** curr,DBitems* itab) {
@@ -91,6 +91,8 @@ WhereNode* get_factor(char* errmsg, DBnode* db, Token** curr, DBitems* itab) {
 		TOKEN_TYPE == NOT_EQUAL) {
 
 		int op = TOKEN_TYPE;
+		NEXT_TOKEN;
+
 		if ((right_ = get_factor(errmsg, db, curr, itab)) == NULL)
 			goto ERROR;
 		if ((op == EQUAL ||
@@ -99,7 +101,7 @@ WhereNode* get_factor(char* errmsg, DBnode* db, Token** curr, DBitems* itab) {
 			op == LESS_OR_EQ ||
 			op == GREATER_OR_EQ ||
 			op == NOT_EQUAL) &&
-			(exp->res_type != NUMBER || right_ != NUMBER))
+			(exp->res_type != NUMBER || right_->res_type != NUMBER))
 			PARSE_ERROR("");
 		
 		WhereNode *f = new_where_node(op);
@@ -117,7 +119,7 @@ ERROR:
 }
 
 WhereNode* get_plus_sub(char* errmsg,DBnode* db, Token** curr,DBitems* itab) {
-	WhereNode *exp,*rn;
+	WhereNode *exp = NULL, *rn = NULL;
 	if ((exp = get_mul_div(errmsg,db,curr, itab)) == NULL)
 		goto ERROR;
 	for (;;) {
@@ -151,9 +153,13 @@ WhereNode* get_base_item(char* errmsg, DBnode* db, Token** curr, DBitems* itab) 
 		NEXT_TOKEN;
 	}else {
 		DBitems *item;
-		if (TOKEN_TYPE == ID && (item = get_item(errmsg, db, curr, TAB_COL_ITEM)) == NULL)
+		int token_type = TOKEN_TYPE;
+
+		if (token_type == ID && (item = get_item(errmsg, db, curr, TAB_COL_ITEM)) == NULL)
 			goto ERROR;
-		else if (TOKEN_TYPE != ID && (item = get_item(errmsg, db, curr, BASE_ITEM)) == NULL)
+		else if (token_type != ID && (item = get_item(errmsg, db, curr, BASE_ITEM)) == NULL)
+			goto ERROR;
+		if (check_item_list(errmsg, item, itab) == SQL_ERROR)
 			goto ERROR;
 		
 		exp = new_where_node(NULL);

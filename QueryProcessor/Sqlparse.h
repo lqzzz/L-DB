@@ -137,6 +137,5 @@ WhereNode* parse_where(char* errmsg, DBnode* db, Token** curr, DBitems* itab);
 
 int execute_select(char* errmsg,DBnode* db,SelectNode* sel);
 
-
 #endif // !_TOKENIZER_H
  

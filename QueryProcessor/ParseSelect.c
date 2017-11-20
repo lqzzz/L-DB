@@ -1,6 +1,7 @@
 #include"Sqlparse.h"
 #include"../BaseStruct/Listhead.h"
 #include"../StorageEngine/BufferManager.h"
+
 //typedef struct select{
 //	DBitems *select_items, *from_items, *group_by_items;
 //	WhereNode* condition;
@@ -62,7 +63,6 @@ int parse_select(char* errmsg,DBnode* db, Token** curr,QueryNode** qnode){
 		if ((sel_node->condition = parse_where(errmsg, db, curr, sel_node->from_items)) == NULL)
 			goto ERROR;
 	}
-	int a;
 	return SQL_OK;
 ERROR:
 	return SQL_ERROR;
