@@ -62,6 +62,7 @@ void new_bufferManager(DBnode* db) {
 	if (bm_list_head == NULL)
 		bm_list_head = bm_;
 	else LIST_ADD_TAIL(&bm_list_head->bm_list, &bm_->bm_list);
+
 }
 
 void bm_add_raw_file_head(int DBid, FHead* filehead) {

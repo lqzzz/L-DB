@@ -51,7 +51,13 @@ void sql_test_init(void) {
 	table_add_col(t2, col5);
 	table_add_col(t2, col6);
 	db_add_table(test_db, t2);
+
 	new_bufferManager(test_db);
+	FHead* f =	new_file_head("test_table", 
+			new_file_head_data(PageCount, 16, 24));
+	bm_add_raw_file_head(get_buffman(0), f);
+	init_file(f);
+
 	init_key_word();
 }
 
@@ -175,6 +181,10 @@ void where_test() {
 	//	node1->select_node->condition->left->opand->col_->column_name);
 }
 
+void select_test() {
+	
+}
+
 void sqltest(void) {
 	sql_test_init();
 	c_db_test();
@@ -182,4 +192,6 @@ void sqltest(void) {
 	insert_test();
 	from_test();
 	//where_test();
+	select_test();
+	//remove("test_table");
 }
