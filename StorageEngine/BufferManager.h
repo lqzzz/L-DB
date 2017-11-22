@@ -8,7 +8,7 @@ typedef struct bm BufferManager;
 BufferManager* get_buffman(int DBid);
 //BufferManager* init_bm(int DBid);
 void new_bufferManager(DBnode* db);
-void bm_add_raw_file_head(int DBid, FHead* filehead);
+void bm_add_raw_file_head(BufferManager* bm, FHead* filehead);
 char* get_next_row(BufferManager* bm, const char* filename, int *pageiter, int *rowiter);
 int buf_insert(BufferManager* bm, const char* filename, const char* row);
 Page* buf_get_page(BufferManager* bm, const char* filename, int pid);

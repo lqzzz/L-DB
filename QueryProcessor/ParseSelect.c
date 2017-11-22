@@ -23,7 +23,7 @@ JoinNode* from_get_join(DBnode* db,DBitems* head) {
 	JoinNode* n;
 	LIST_FOREACH(item, head,
 		n = new_join_node(item->table_);
-		//n->page_ = buf_get_page(bm, TABLE_GET_NAME(n->table_), n->pid);
+		n->page_ = buf_get_page(bm, TABLE_GET_NAME(n->table_), n->pid);
 		if (j_head == NULL)
 			j_head = n;
 		else 
@@ -72,7 +72,7 @@ char* execute_from(DBnode* db, JoinNode* join) {
 	if (join->is_join) {
 		size_t left_len = TABLE_GET_DATA_LEN(join->left->table_),
 			right_len = TABLE_GET_DATA_LEN(join->right->table_);
-		char* join_row = mem_alloc(left_len + right_len);
+		char* join_row = join->join_row;
 		memcpy(join_row, execute_from(db, join->left), left_len);
 		memcpy(join_row + left_len, 
 			execute_from(db, join->right), right_len);
@@ -91,8 +91,12 @@ char* execute_from(DBnode* db, JoinNode* join) {
 
 int execute_select(char* errmsg,DBnode* db,SelectNode* sel) {
 	char* row = execute_from(db, sel->join);
-	WhereNode* con = sel->condition;
-
+	WhereNode* con;
+	if (sel->condition) {
+			
+	}else {
+		return row;
+	}
 }
 
 int execute_where(char* row,int ref, DBnode* db, WhereNode* con) {

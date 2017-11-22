@@ -68,6 +68,7 @@ typedef struct join{
 	Table* table_;
 	JoinNode *left, *right;
 	Page* page_;
+	char* join_row;
 	int pid;
 	int rid;
 	WhereNode* condition;
@@ -136,6 +137,7 @@ int parse_insert(char* errmsg, DBnode* dbnode, Token** curr, QueryNode** pnode);
 WhereNode* parse_where(char* errmsg, DBnode* db, Token** curr, DBitems* itab);
 
 int execute_select(char* errmsg,DBnode* db,SelectNode* sel);
+char* execute_from(DBnode* db, JoinNode* join);
 
 #endif // !_TOKENIZER_H
  

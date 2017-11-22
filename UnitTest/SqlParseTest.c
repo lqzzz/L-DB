@@ -53,11 +53,12 @@ void sql_test_init(void) {
 	db_add_table(test_db, t2);
 
 	new_bufferManager(test_db);
+	BufferManager* b = get_buffman(test_db->id_);
 	FHead* f =	new_file_head("test_table", 
 			new_file_head_data(PageCount, 16, 24));
-	bm_add_raw_file_head(get_buffman(0), f);
 	init_file(f);
-
+	bm_add_raw_file_head(b, f);
+	//list_len(b->)
 	init_key_word();
 }
 
@@ -146,6 +147,12 @@ static from_test(void) {
 	EXPECT_EQ_STR("col1",
 	node1->select_node->select_items->col_->column_name);
 
+	char* row = execute_from(test_db, node1->select_node->join);
+	EXPECT_EQ_INT(1, *(int*)row);
+	EXPECT_EQ_STR('col3', row + 4);
+
+
+
 	DBitems* next = node1->select_node->select_items->head.next_;
 
 	EXPECT_EQ_STR("col2", next->col_->column_name);
@@ -158,6 +165,8 @@ static from_test(void) {
 		left->table_->t_info.table_name);
 	EXPECT_EQ_STR("test_table2",node2->select_node->join->
 		right->table_->t_info.table_name);
+
+	
 	//puts(errmsg);
 }
 
@@ -179,10 +188,11 @@ void where_test() {
 	//	node1->select_node->condition->left->opand->table_->t_info.table_name);
 	//EXPECT_EQ_STR("col1",
 	//	node1->select_node->condition->left->opand->col_->column_name);
+
 }
 
 void select_test() {
-	
+ 	
 }
 
 void sqltest(void) {
@@ -191,7 +201,7 @@ void sqltest(void) {
 	c_table_test();
 	insert_test();
 	from_test();
-	//where_test();
+	where_test();
 	select_test();
-	//remove("test_table");
+	remove("test_table");
 }

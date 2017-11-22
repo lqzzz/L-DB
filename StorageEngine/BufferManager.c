@@ -44,7 +44,8 @@ Ptr get_bm_head(void) {
 static FHead* find_file_head(Ptr bm,const char* filename) {
 	FHead* file_head = NULL;
 	char flag = 0;
-	LIST_FOREACH(file_head, &bm->file_head_list,
+	int s = strcmp(bm->file_head_list->filename_, filename);
+	LIST_FOREACH(file_head, &bm->file_head_list->head,
 		if (strcmp(file_head->filename_, filename) == 0) {
 			flag = 1;
 			break;
@@ -65,8 +66,7 @@ void new_bufferManager(DBnode* db) {
 
 }
 
-void bm_add_raw_file_head(int DBid, FHead* filehead) {
-	BufferManager* bm = get_buffman(DBid);
+void bm_add_raw_file_head(Ptr bm, FHead* filehead) {
 	if (bm->file_head_list == NULL)
 		bm->file_head_list = filehead;
 	else LIST_ADD_TAIL(&bm->file_head_list->head, &filehead->head);
@@ -75,10 +75,11 @@ void bm_add_raw_file_head(int DBid, FHead* filehead) {
 Page* buf_get_page(BufferManager* bm, const char* filename, int pid) {
 	if (pid > PageCount)
 		return NULL;
+	int s = list_len(bm->file_head_list);
+
 	FHead* file_head = find_file_head(bm, filename);
-
 	Page* page_;
-
+	
 	if ((page_ = file_get_mem_page(file_head, pid)) == NULL) {
 		//
 		page_ = file_get_new_page(file_head, pid);

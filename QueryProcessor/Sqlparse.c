@@ -20,6 +20,9 @@ JoinNode* join_lr(JoinNode* left, JoinNode* right){
 	n->right = right;
 	n->is_join = 1;
 	n->table_ = new_join_table(left->table_, right->table_);
+	size_t left_len = TABLE_GET_DATA_LEN(left->table_),
+		right_len = TABLE_GET_DATA_LEN(right->table_);
+	n->join_row = mem_alloc(left_len + right_len);
 	return n;
 }
 
