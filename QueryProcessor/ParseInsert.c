@@ -48,8 +48,8 @@ int parse_insert_values(char* errmsg, DBnode* db, InsertNode* insertnode, Token*
 	DBitems* dbitem;
 	LIST_FOREACH(dbitem, insertnode->set_cols,
 		col = dbitem->col_;
-		enum TokenType itemtype = baseitem->base_item->token_type;
-		enum TokenType datatype = col->column_data_type;
+		enum Tokentype itemtype = baseitem->base_item->token_type;
+		enum Tokentype datatype = col->column_data_type;
 
 		if (!((datatype == itemtype) || 
 			itemtype == TEXT && datatype == CHAR ))

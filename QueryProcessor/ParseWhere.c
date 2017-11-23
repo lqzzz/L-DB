@@ -1,11 +1,13 @@
 #include"Sqlparse.h"
 #define BOOL 0
 #define NUMBER 1
+
 //static enum Type{
 //	logic,
 //	math,
 //	
 //};
+
 WhereNode* parse_where(char* errmsg,DBnode* db, Token** curr,DBitems* itab);
 static WhereNode* get_term(char* errmsg, DBnode* db, Token** curr, DBitems* itab);
 static WhereNode* get_factor(char* errmsg,DBnode* db,Token** curr,DBitems* itab);

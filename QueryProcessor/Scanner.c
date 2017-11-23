@@ -6,7 +6,7 @@
 static Dict *dict;//¹Ø¼ü×Ö±í
 static DictType dtype = { NULL,NULL,strcmp,NULL,NULL,dict_str_hashfunction };
 static int char_type(char);
-static Token* token_new(char* value, int cnum, int lnum, int tokentype);
+static Token* token_new(char* value, int cnum, int lnum, int Tokentype);
 
 int char_type(char ch) {
 	if (ch >= 'a'&&ch <= 'z' ||
@@ -21,12 +21,12 @@ int char_type(char ch) {
 		return SYMBOL;
 }
 
-Token* token_new(char* value, int cnum, int lnum, int tokentype) {
+Token* token_new(char* value, int cnum, int lnum, int Tokentype) {
 	Token* token_;
 	token_ = mem_alloc(sizeof(Token));
 	token_->c_num = cnum;
 	token_->l_num = lnum;
-	token_->token_type = tokentype;
+	token_->token_type = Tokentype;
 	LIST_INIT(&token_->list_head);
 	token_->value_ = value;
 	return token_;

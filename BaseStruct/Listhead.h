@@ -47,6 +47,6 @@ typedef struct Listhead {
 }Listhead;
 size_t list_len(Listhead* list);
 void list_del_all(Listhead* node, void del(void *));
-void* list_search(Listhead *listhead, void* key, int cmp(void*, void*));
+void* list_search(Listhead *listhead, const void* key, int cmp(void*, void*));
 
 #endif // !_LISTHEAD_H

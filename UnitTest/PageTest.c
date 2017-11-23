@@ -60,10 +60,12 @@ static void page_test_add_row(FHead* f) {
 }
 
 void page_test(void) {
+
 	size_t rowlen = 36;
 	size_t rps = PageSize - 2 * sizeof(size_t);
 	size_t rsn = rps / rowlen;
 	while (rsn * rowlen + rsn > rps) rsn--;
+
 	FileHeadData* fhd = new_file_head_data(4, rsn, rowlen);
 	FHead* fh = new_file_head("test.data", fhd);
 

@@ -1,4 +1,3 @@
-
 #include"Sqlparse.h"
 
 QueryNode* create_join(Vector* from) {

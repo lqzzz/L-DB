@@ -30,7 +30,7 @@ DBnode* database_create(char* name,size_t id,size_t tablecount){
 	return dbnode;
 }
 
-Column* new_column(char* colname, char* tablename, char*dbname, size_t id,enum TokenType DT,size_t datalen){
+Column* new_column(char* colname, char* tablename, char*dbname, size_t id,enum Tokentype DT,size_t datalen){
 	Column* col = mem_calloc(1,sizeof(Column));
 	strcpy(col->column_name, colname);
 	strcpy(col->column_table_name, tablename);
@@ -41,7 +41,7 @@ Column* new_column(char* colname, char* tablename, char*dbname, size_t id,enum T
 	return col;
 }
 
-void col_set_info(Column * col, size_t column_num, enum TokenType column_data_type, size_t column_not_null, size_t column_unique, size_t column_rec_offset,size_t datalen, char * column_name, char * column_table_name, char * column_db_name){
+void col_set_info(Column * col, size_t column_num, enum Tokentype column_data_type, size_t column_not_null, size_t column_unique, size_t column_rec_offset,size_t datalen, char * column_name, char * column_table_name, char * column_db_name){
 	if(column_name)
 		strcpy(col->column_name, column_name);
 	if(column_table_name)
