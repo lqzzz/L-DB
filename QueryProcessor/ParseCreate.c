@@ -6,7 +6,7 @@ int parse_create(char* errmsg,DBnode* dbnode, Token** curr) {
 	{
 	case TABLE:
 		NEXT_TOKEN;
-		if ((table_ = parse_create_table(errmsg,dbnode, curr)) == SQL_ERROR)
+		if ((table_ = parse_create_table(errmsg,dbnode, curr)) == NULL)
 			goto ERROR;
 		db_add_table(dbnode, table_);
 
@@ -54,7 +54,7 @@ Table* parse_create_table(char* errmsg,DBnode *dbnode, Token** curr) {
 
 	return table;
 ERROR:
-	return SQL_ERROR;
+	return NULL;
 }
 int parse_datatype(char* errmsg,int datatype, Token** curr) {
 	switch (datatype) {

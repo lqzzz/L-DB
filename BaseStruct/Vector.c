@@ -34,7 +34,7 @@ static __inline int32_t default_comp(int* v1, int* v2) {
 	else return 0;
 }
 
-static __inline void* linear_search(Vector* v, const void* key,int32_t(*comp)(void*, void*)) {	
+static __inline void* linear_search(Vector* v, const void* key,int32_t(*comp)(const void*, const void*)) {	
 	size_t length_ = v->usedsize_;
 	void** vector_ = v->vector_;
 	for (size_t i = 0; i < length_; i++){
@@ -44,7 +44,7 @@ static __inline void* linear_search(Vector* v, const void* key,int32_t(*comp)(vo
 	return NULL;
 }
 
-static void* binary_search(Vector * v,const void* key,int32_t(*comp_)(void*, void*)){
+static void* binary_search(Vector * v,const void* key,int32_t(*comp_)(const void*, const void*)){
 	void **v_ = v->vector_;
 	int32_t lo = 0, hi = v->usedsize_;
 	while (hi > lo) {

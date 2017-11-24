@@ -11,10 +11,8 @@ __inline int row_has_next(Page* p,size_t rowindex) {
 }
 
 int get_row_index(Page* p,size_t rowindex) {
-	if (rowindex >= p->slot_count)
+	if (rowindex >= p->pdata.used_slot_size)
 		return P_ERROR;
-	if (p->slot_state_head_ptr[rowindex] == P_EMPTY)
-		return get_row_index(p, ++rowindex);
 	return rowindex;
 }
 
@@ -42,61 +40,41 @@ void init_file(FHead *fh){
 	//
 	write_file_head(fh);
 
-	struct {
-		size_t page_id;
-		size_t used_slot_size;
-		char slot_state_head[];
-	}*initdata;
+	//struct {
+	//	size_t page_id;
+	//	size_t used_slot_size;
+	//	char slot_state_head[];
+	//}*initdata;
 
-	size_t pagecount = fh->filehead->page_count;
+	//size_t pagecount = fh->filehead->page_count;
 
-	size_t len = sizeof(*initdata) +
-		fh->filehead->row_slot_count * sizeof(char);
-	
-	initdata = mem_calloc(1, len);
+	//size_t len = sizeof(*initdata) +
+	//	fh->filehead->row_slot_count * sizeof(char);
+	//
+	//initdata = mem_calloc(1, len);
 
-	size_t offset = PageSize - len;
+	//size_t offset = PageSize - len;
 
-	FILE* f = fopen(fh->filename_, "rb+");
+	//FILE* f = fopen(fh->filename_, "rb+");
 
-	fseek(f, PageSize, SEEK_CUR);
+	//fseek(f, PageSize, SEEK_CUR);
 
-	for (size_t i = 0; i < pagecount; i++) {
-		fwrite(initdata, len, 1, f);
-		initdata->page_id++;
-		fseek(f, offset, SEEK_CUR);
-	}
+	//for (size_t i = 0; i < pagecount; i++) {
+	//	fwrite(initdata, len, 1, f);
+	//	initdata->page_id++;
+	//	fseek(f, offset, SEEK_CUR);
+	//}
 
-	mem_free(initdata);
-	fflush(f);
-	fclose(f);
+	//mem_free(initdata);
+	//fflush(f);
+	//fclose(f);
 }
 
-//char* file_get_row(FHead* fh, size_t pageid, size_t rowindex){
-//	Page* p;
-//	return p = file_get_page_by_id(fh, pageid) ?
-//		page_get_row(p, rowindex) : NULL;
-//}
-
-//int file_add_row(FHead* fh, size_t pageid, size_t rowindex,const char* row){
-//	if(fh->page_states[pageid] == P_FULL)
-//		return P_ERROR;
-//
-//	Page* p = file_get_page_by_id(fh, pageid);
-//
-//	if (page_add_row(p,rowindex,row) == P_ERROR)
-//		return P_ERROR;
-//	if (p->pdata.used_slot_size == p->slot_count)
-//		fh->page_states[pageid] = P_FULL;
-//	return P_OK;
-//}
-
-FHead* new_file_head(char* filename, FileHeadData* fhd){
+FHead* new_file_head(const char* filename, FileHeadData* fhd){
 	FHead* fh = mem_calloc(1,sizeof(*fh));
 	LIST_INIT(&fh->head);
 	fh->filename_ = filename;
 	fh->filehead = fhd;
-	fh->page_states = fhd->page_state_head;
 	//memset(fh->mem_page_bit_map, 0, PageCount*size_t);
 	return fh;
 }
@@ -136,7 +114,7 @@ int load_page(FHead* p,size_t id,Page* page){
 int store_page(Page* page,FHead* p){
 	FILE* fd_;
 	fd_ = fopen(p->filename_, "rb+");
-	//
+
 	fseek(fd_, (page->pdata.page_id + 1) * PageSize, SEEK_CUR);
 
 	fwrite(&page->pdata, PageSize, 1, fd_);
@@ -181,7 +159,7 @@ int page_state(FHead* f, size_t pid) {
 
 Page* file_get_mem_page(FHead* f ,size_t pageid) {
 	if (pageid >= f->filehead->page_count)
-		return P_ERROR;
+		return NULL;
 	Page *p;
 	if (p = f->mem_page_bit_map[pageid])
 		return p;
@@ -198,16 +176,21 @@ void set_page_full_state(FHead* p, int id,char state){
 	p->page_states[id] = state;
 }
 
-Page* new_page(size_t rowlen, size_t slot_count){
+Page* new_empty_page(void) {
 	Page* p = mem_alloc(sizeof(Page) - 
 		sizeof(PageData) + PageSize);
 	LIST_INIT(&p->head);
+	p->is_dirty = 0;
+	p->row_offset_table = p->pdata.offset_table_and_rows;
+	return p;
+}
+
+Page* new_page(size_t rowlen, size_t slot_count){
+	Page* p = new_empty_page();
 	p->row_len = rowlen;
 	p->slot_count = slot_count;
-	p->slot_state_head_ptr = p->pdata.row_set;
-	p->rows_head = p->pdata.row_set + slot_count * sizeof(char);
-	//p->slot_state_head_ptr = &p->pdata.s;
-	//p->rows_head = p->pdata.row_set;
+	p->rows_head = p->pdata.offset_table_and_rows + 
+		slot_count * sizeof(size_t);
 	return p;
 }
 

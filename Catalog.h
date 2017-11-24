@@ -5,7 +5,7 @@
 
 #define NAME_LEN 24 
 
-#define DBNODE_SEARCH(head,key) list_search(head,key,db_match_name)
+#define DBNODE_SEARCH(head,key) (DBnode*)list_search(head,key,db_match_name)
 #define TABLE_GET_NAME(t) (t)->t_info.table_name
 #define TABLE_GET_DATA_LEN(t) (t)->t_info.table_data_len
 

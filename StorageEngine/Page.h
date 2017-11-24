@@ -18,7 +18,7 @@
 typedef struct {
 	size_t page_id;
 	size_t used_slot_size;
-	char row_set[];
+	char offset_table_and_rows[];
 }PageData;
 
 typedef struct {
@@ -26,8 +26,7 @@ typedef struct {
 	size_t row_len;
 	size_t slot_count;
 	int16_t is_dirty;
-	int32_t hot_;
-	char* slot_state_head_ptr;
+	size_t* row_offset_table;
 	char* rows_head;
 	PageData pdata;
 }Page;
@@ -35,20 +34,17 @@ typedef struct {
 typedef struct{
 	size_t row_slot_count;
 	size_t row_len;
-	size_t used_size;
+	size_t page_used_size;
 	size_t page_count;
 	char page_state_head[];
 }FileHeadData;
 
 typedef struct {
 	Listhead head;
-	//Vector mem_page_bit_map;
-	//Vector rows;
+	Vector cols;
 	char* filename_;
+	Page** mem_page_bit_map;
 	FileHeadData* filehead;
-	char* page_states;
-	Vector* cols;
-	Page* mem_page_bit_map[PageCount];
 }FHead;
 
 FileHeadData* new_file_head_data(size_t pagecount,
@@ -59,6 +55,7 @@ FHead* read_file_head(const char* filename, size_t rowlen, size_t rowslotcount);
 void init_file(FHead* fh);
 int file_add_row(FHead* fh,const char* row);
 
+Page* new_empty_page(void);
 Page* new_page(size_t rowlen, size_t slot_count);
 int load_page(FHead* p, size_t id, Page* page);
 int store_page(Page*, FHead*);

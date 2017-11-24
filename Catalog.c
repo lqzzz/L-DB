@@ -26,7 +26,7 @@ DBnode* database_create(char* name,size_t id,size_t tablecount){
 	dbnode->id_ = id;
 	dbnode->table_count = tablecount;
 	VECTOR_INIT(&dbnode->tables);
-	LIST_INIT(dbnode);
+	LIST_INIT(&dbnode->list_head);
 	return dbnode;
 }
 

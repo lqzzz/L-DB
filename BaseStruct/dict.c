@@ -159,10 +159,8 @@ int dict_expand(Dict * d, unsigned long size){
 
 int dict_add_entry(Dict* dict,void* key,void* value){
 	DictEntry **ptr_ = dict_get_entry(dict,key);
-	if (*ptr_) {
-		printf(" %s ≤Â»Î ß∞‹\n", key);
+	if (*ptr_) 
 		return DICT_ERR;
-	}
 	DictEntry *entry_ = mem_alloc(sizeof(DictEntry));
 	DictSetHashKey(dict, entry_, key);
 	DictSetHashValue(dict, entry_,value);
