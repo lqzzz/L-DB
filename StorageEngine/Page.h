@@ -16,6 +16,13 @@
 #define P_FULL '2'
 
 typedef struct {
+	Listhead head;
+	int create_verson;
+	int del_verson;
+	char* row;
+}MvccRows;
+
+typedef struct {
 	size_t page_id;
 	size_t used_slot_size;
 	char offset_table_and_rows[];
@@ -26,6 +33,7 @@ typedef struct {
 	size_t row_len;
 	size_t slot_count;
 	int16_t is_dirty;
+	MvccRows** m_rows;
 	size_t* row_offset_table;
 	char* rows_head;
 	PageData pdata;
@@ -36,12 +44,11 @@ typedef struct{
 	size_t row_len;
 	size_t page_used_size;
 	size_t page_count;
-	char page_state_head[];
+	char page_key_bound[]; //max min pairs
 }FileHeadData;
 
 typedef struct {
 	Listhead head;
-	Vector cols;
 	char* filename_;
 	Page** mem_page_bit_map;
 	FileHeadData* filehead;
@@ -65,6 +72,8 @@ void pagedata_init(PageData* pd);
 void page_del(FHead* f, Page* p);
 int page_add_row(Page* p,int index, const char* row);
 int page_get_free_slot(Page* p);
+
+int file_find_pid(FHead* f,const char* key);
 
 char* file_get_row(FHead* fh, size_t pageid, size_t rowindex);
 char* page_get_row(const Page* p, size_t index);

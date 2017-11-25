@@ -75,7 +75,6 @@ void bm_add_raw_file_head(Ptr bm, FHead* filehead) {
 Page* buf_get_page(BufferManager* bm, const char* filename, int pid) {
 	if (pid > PageCount)
 		return NULL;
-	int s = list_len(bm->file_head_list);
 
 	FHead* file_head = find_file_head(bm, filename);
 	Page* page_;

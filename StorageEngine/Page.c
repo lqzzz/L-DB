@@ -2,13 +2,13 @@
 #include"../Mem/MemPool.h"
 #include"Page.h"
 
-__inline int page_has_next(FHead* p, size_t index) {
-	return index == p->filehead->page_count ? P_ERROR : P_OK;
-}
-
-__inline int row_has_next(Page* p,size_t rowindex) {
-	return rowindex == p->slot_count ? P_ERROR : P_OK;
-}
+//__inline int page_has_next(FHead* p, size_t index) {
+//	return index == p->filehead->page_count ? P_ERROR : P_OK;
+//}
+//
+//__inline int row_has_next(Page* p,size_t rowindex) {
+//	return rowindex == p->slot_count ? P_ERROR : P_OK;
+//}
 
 int get_row_index(Page* p,size_t rowindex) {
 	if (rowindex >= p->pdata.used_slot_size)
@@ -26,11 +26,10 @@ void write_file_head(const FHead* p){
 
 FileHeadData* new_file_head_data(size_t pagecount, size_t rowslotcount, size_t rowlen){
 	FileHeadData* fhg = mem_alloc(PageSize);
-	fhg->page_count = pagecount;
+	fhg->page_count= pagecount;
 	fhg->row_len = rowlen;
 	fhg->row_slot_count = rowslotcount;
-	fhg->used_size = 0;
-	memset(fhg->page_state_head, 0, pagecount);
+	fhg->page_used_size = 0;
 	return fhg;
 }
 
@@ -97,16 +96,15 @@ int load_page(FHead* p,size_t id,Page* page){
 	FILE* fd_;
 
 	fd_ = fopen(p->filename_, "rb");
-	//if (fd_ == NULL) return 1;
 
 	fseek(fd_, (id + 1) * PageSize, SEEK_CUR);
-
-	page->slot_count = p->filehead->row_slot_count;
-	page->row_len = p->filehead->row_len;
 
 	fread(&page->pdata, PageSize, 1, fd_);
 
 	fclose(fd_);
+
+	page->slot_count = p->filehead->row_slot_count;
+	page->row_len = p->filehead->row_len;
 	p->mem_page_bit_map[id] = page;
 	return 1;
 }
@@ -189,8 +187,9 @@ Page* new_page(size_t rowlen, size_t slot_count){
 	Page* p = new_empty_page();
 	p->row_len = rowlen;
 	p->slot_count = slot_count;
-	p->rows_head = p->pdata.offset_table_and_rows + 
-		slot_count * sizeof(size_t);
+	p->row_offset_table = p->pdata.offset_table_and_rows;
+	p->rows_head = p->row_offset_table + slot_count;
+	p->m_rows = mem_alloc(sizeof(size_t)*slot_count);
 	return p;
 }
 
@@ -225,6 +224,11 @@ int page_get_free_slot(Page * p){
 			return index;
 	}
 	return P_ERROR;
+}
+
+int file_find_pid(FHead * f, const char* key){
+	
+	return 0;
 }
 
 char* page_get_row(Page * p, size_t index){
