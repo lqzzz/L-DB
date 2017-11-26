@@ -19,7 +19,7 @@ SelectNode* new_select_node(){
 JoinNode* from_get_join(DBnode* db,DBitems* head) {
 	DBitems* item;
 	JoinNode *j_head = NULL;
-	BufferManager* bm = get_buffman(db->id_);
+	PBM bm = get_buffman(db->id_);
 	JoinNode* n;
 	LIST_FOREACH(item, head,
 		n = new_join_node(item->table_);
@@ -79,7 +79,7 @@ char* execute_from(DBnode* db, JoinNode* join) {
 		return join_row;
 	}else {
 		if ((join->rid = get_row_index(join->page_, join->rid)) == P_ERROR) {
-			BufferManager* bm = get_buffman(db->id_);
+			PBM bm = get_buffman(db->id_);
 			join->pid++;
 			join->rid = 0;
 			if ((join->page_ = buf_get_page(bm, TABLE_GET_NAME(join->table_), join->pid)) == NULL)

@@ -67,7 +67,7 @@ typedef struct join{
 	int is_join;
 	Table* table_;
 	JoinNode *left, *right;
-	Page* page_;
+	Page page_;
 	char* join_row;
 	int pid;
 	int rid;
@@ -106,7 +106,7 @@ typedef struct query{
 	//enum Tokentype operator_; // and or not  eq ex...
 	//Pair left_opand, right_opand;
 
-	//FHead* file_;
+	//FHead file_;
 }QueryNode;
 
 QueryNode* new_insert_query(void);
