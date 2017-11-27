@@ -25,7 +25,7 @@ int parse_create(char* errmsg,DBnode* dbnode, Token** curr) {
 			PARSE_ERROR("该数据库已存在");
 		NEXT_TOKEN;
 		DBnode* db_ = database_create(db_name, ((DBnode*)dbnode->list_head.prve_)->id_ + 1, 0);
-		new_bufferManager(db_);
+		new_bufferManager(db_->id_);
 		if(dbnode)
 			LIST_ADD_TAIL(&dbnode->list_head, &db_->list_head);
 		return SQL_OK;

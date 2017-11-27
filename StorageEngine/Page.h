@@ -14,6 +14,7 @@
 #define P_FULL '2'
 
 #define R_EMPTY '\0'
+#define R_NOT_EMPTY '1'
 
 typedef struct file* FHead;
 typedef const struct file* CFHead;
@@ -86,12 +87,13 @@ Page new_empty_page(void);
 Page new_page(size_t rowlen, size_t slot_count);
 int load_page(FHead p, size_t id, Page page);
 int store_page(Page, FHead);
+int page_free(Page p);
+
 void page_init(Page p, size_t rowlen, size_t slot_count);
 //int page_add_row(Page p, size_t slot_index, const char* row);
 void page_del(FHead f, Page p);
 int page_add_row(Page p,int index, const char* row);
 int page_get_empty_slot(Page p);
-int file_find_pid(FHead f,const char* key);
 
 char* file_get_row(FHead fh, size_t pageid, size_t rowindex);
 char* page_get_row(const Page p, size_t index);
@@ -108,5 +110,6 @@ int get_row_index(Page p, size_t rowindex);
 char* page_next_row(const Page page, size_t *rowiter);
 int next_page_id(const FHead filehead, size_t* pageid);
 
+int mvccrows_free(MvccRows mr);
 #endif // !PAGE_H
 

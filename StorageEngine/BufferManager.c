@@ -21,8 +21,6 @@ __inline static FHead find_file_head(PBM bm, const char* filename);
 __inline static FHead find_file_head(PBM bm, const char* filename);
 
 static Page get_page(PBM bm, const char* filename, size_t pid) {
-	if (pid > PageCount)
-		return NULL;
 	FHead file_head = find_file_head(bm, filename);
 	size_t page_id;
 	if ((page_id = next_page_id(file_head, &pid)) == P_ERROR)
@@ -54,16 +52,14 @@ static FHead find_file_head(PBM bm,const char* filename) {
 	return flag ? file_head : NULL;
 }
 
-void new_buffermanager(DBnode* db) {
+void new_buffermanager(int dbid) {
 	PBM bm_ = mem_alloc(sizeof(*bm_));
-	bm_->DB_id = db->id_;
+	bm_->DB_id = dbid;
 	LIST_INIT(&bm_->bm_list);
 	bm_->file_head_list = NULL;
-
 	if (bm_list_head == NULL)
 		bm_list_head = bm_;
 	else LIST_ADD_TAIL(&bm_list_head->bm_list, &bm_->bm_list);
-
 }
 
 void bm_add_raw_file_head(PBM bm, FHead filehead) {
@@ -87,7 +83,6 @@ Page buf_get_page(PBM bm, const char* filename, int pid) {
 		else LIST_ADD_TAIL(&bm->p_lru_list->head, &page_->head);
 	}
 	return page_;
-
 }
 
 int buf_insert(PBM* bm, const char* filename, const char* row){

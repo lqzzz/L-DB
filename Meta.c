@@ -70,7 +70,7 @@ int read_database_info(void) {
 			fread(&info, sizeof(DatabaseInfo), 1, fd);
 			DBnode *next_ = database_create(info.dbname, 
 				info.db_num, info.table_count);
-			new_bufferManager(next_);
+			new_bufferManager(next_->id_);
 			if (dbhead == NULL)
 				dbhead = next_;
 			else LIST_ADD_TAIL(&dbhead->list_head, &next_->list_head);

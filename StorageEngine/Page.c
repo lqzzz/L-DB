@@ -16,47 +16,37 @@ void write_file_head(CFHead f){
 	fclose(fd_);
 }
 
-//FileInfo* new_file_head_data(size_t pagecount, size_t rowslotcount, size_t rowlen){
-//	FileInfo* fhg = mem_alloc(PageSize);
-//	fhg->page_count= pagecount;
-//	fhg->row_len = rowlen;
-//	fhg->row_slot_count = rowslotcount;
-//	fhg->page_used_size = 0;
-//	return fhg;
-//}
-
 void init_file(FHead fh){
-
 	fclose(fopen(fh->filename_, "a"));
 
 	FILE* f = fopen(fh->filename_, "rb+");
 
 	fwrite(&fh->info, PageSize, 1, f);
 
-	struct {
-		size_t page_id;
-		size_t used_slot_size;
-		char slot_state_head[];
-	}*initdata;
-
-	size_t pagecount = fh->info.page_count;
-
-	size_t len = sizeof(*initdata) +
-		fh->info.row_slot_count * sizeof(char);
-	
-	initdata = mem_calloc(1, len);
-
-	size_t offset = PageSize - len;
-
-	for (size_t i = 0; i < fh->info.page_count; i++) {
-		fwrite(initdata, len, 1, f);
-		initdata->page_id++;
-		fseek(f, offset, SEEK_CUR);
-	}
-
 	fflush(f);
 	fclose(f);
 }
+
+	//struct {
+	//	size_t page_id;
+	//	size_t used_slot_size;
+	//	char slot_state_head[];
+	//}*initdata;
+
+	//size_t pagecount = fh->info.page_count;
+
+	//size_t len = sizeof(*initdata) +
+	//	fh->info.row_slot_count * sizeof(char);
+	//
+	//initdata = mem_calloc(1, len);
+
+	//size_t offset = PageSize - len;
+
+	//for (size_t i = 0; i < fh->info.page_count; i++) {
+	//	fwrite(initdata, len, 1, f);
+	//	initdata->page_id++;
+	//	fseek(f, offset, SEEK_CUR);
+	//}
 
 FHead new_empty_file() {
 	FHead fh = mem_alloc(sizeof(struct filehead) + PageSize);
@@ -79,6 +69,7 @@ FHead* new_file_head(const char* filename,size_t pagecount,
 
 FHead read_file_head(const char* filename,size_t rowlen,size_t rowslotcount) {
 	FILE* fd_;
+
 	FHead f = new_empty_file();
 
 	fd_ = fopen(filename, "rb");
@@ -95,10 +86,10 @@ FHead read_file_head(const char* filename,size_t rowlen,size_t rowslotcount) {
 	return f;
 }
 
-int load_page(FHead p,size_t id,Page page){
+int load_page(FHead f,size_t id,Page page){
 	FILE* fd_;
 
-	fd_ = fopen(p->filename_, "rb");
+	fd_ = fopen(f->filename_, "rb");
 
 	fseek(fd_, (id + 1) * PageSize, SEEK_CUR);
 
@@ -106,35 +97,42 @@ int load_page(FHead p,size_t id,Page page){
 
 	fclose(fd_);
 
-	page->slot_count = p->info.row_slot_count;
-	page->row_len = p->info.row_len;
-	p->mem_page_bit_map[id] = page;
-	return 1;
+	page->slot_count = f->info.row_slot_count;
+	page->row_len = f->info.row_len;
+	f->mem_page_bit_map[id] = page;
+
+	return P_OK;
 }
 
-int store_page(Page page,FHead p){
+int store_page(Page page,FHead f){
 	FILE* fd_;
-	fd_ = fopen(p->filename_, "rb+");
+	fd_ = fopen(f->filename_, "rb+");
 
 	fseek(fd_, (page->info.page_id + 1) * PageSize, SEEK_CUR);
 
 	fwrite(&page->info, PageSize, 1, fd_);
 
 	fclose(fd_);
-	//dict_del_entry_nofree(p->page_id_map, 
-	//	page->info.page_id);
+	f->mem_page_bit_map[page->info.page_id] = NULL;
+
 	return 1;
 }
 
+int page_free(Page p){
+	//mvccrows_free(p->rows_head)
+	mem_free(p);
+	return P_OK;
+}
+
 int file_get_not_full_page_id(FHead f) {
-	char* page_state_head = f->info.page_states;
-	int page_id = -1;
+
 	for (size_t i = 0; i < f->info.page_count; i++) 
-		if (page_state_head[i] != P_FULL) {
-			page_id = i;
-			break;
-		}
-	return page_id;
+		if (f->info.page_states[i] != P_FULL) 
+			return i;
+
+	Page p = new_page(f->info.row_len, f->info.row_slot_count);
+
+	return p->info.page_id = f->info.page_count++;
 }
 
 char * get_file_name(FHead p){
@@ -151,8 +149,9 @@ int next_page_id(FHead f, size_t* index) {
 	return *index;
 }
 
-int page_state(FHead f, size_t pid) {
-		
+int mvccrows_free(MvccRows mr){
+
+	return 0;
 }
 
 Page file_get_mem_page(FHead f ,size_t pageid) {
@@ -175,9 +174,10 @@ void set_page_full_state(FHead f, int id,char state){
 }
 
 Page new_empty_page(void) {
-	Page p = mem_alloc(sizeof(struct phead) + PageSize);
+	Page p = mem_calloc(sizeof(struct phead) + PageSize);
 	LIST_INIT(&p->head);
-	p->is_dirty = 0;
+	//p->is_dirty = 0;
+	//p->info.used_slot_size = 0;
 	return p;
 }
 
@@ -203,7 +203,7 @@ int page_add_row(Page p, int index,const char* row){
 
 	memcpy(prow, row, p->row_len);
 	p->info.used_slot_size++;
-	p->info.slot_states[index] = P_NOT_EMPTY;
+	p->info.slot_states[index] = R_NOT_EMPTY;
 	return P_OK;
 }
 
@@ -213,11 +213,6 @@ int page_get_empty_slot(Page p){
 			return index;
 	}
 	return P_ERROR;
-}
-
-int file_find_pid(FHead * f, const char* key){
-	
-	return 0;
 }
 
 char* page_get_row(Page p, size_t index){
