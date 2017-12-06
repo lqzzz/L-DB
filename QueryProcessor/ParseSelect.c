@@ -22,8 +22,7 @@ JoinNode* from_get_join(DBnode* db,DBitems* head) {
 	PBM bm = get_buffman(db->id_);
 	JoinNode* n;
 	LIST_FOREACH(item, head,
-		n = new_join_node(item->table_);
-		n->page_ = buf_get_page(bm, TABLE_GET_NAME(n->table_), n->pid);
+		n = new_join_node(bm,item->table_);
 		if (j_head == NULL)
 			j_head = n;
 		else 

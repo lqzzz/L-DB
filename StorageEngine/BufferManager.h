@@ -2,15 +2,15 @@
 #define BUFFERMANAGER_H
 #include"Page.h"
 typedef struct buffermanager* PBM;
+typedef struct piter* PIterator;
 
-//void page_fill(PBM bm, char* filename, VectorIter* rowiter);
 PBM get_buffman(int DBid);
-//PBM init_bm(int DBid);
-void new_bufferManager(int dbid);
+void new_buffermanager(int dbid);
 void bm_add_raw_file_head(PBM bm, FHead filehead);
-char* get_next_row(PBM bm, const char* filename, int *pageiter, int *rowiter);
 int buf_insert(PBM bm, const char* filename, const char* row);
-Page buf_get_page(PBM bm, const char* filename, int pid);
+PIterator get_table_iter(PBM bm, const char* filename);
+const char* next_row(PIterator i);
+
 //char* scan_table(char* tablename, *int pid, *int rid);
 #endif // !BUFFERMANAGER_H
 

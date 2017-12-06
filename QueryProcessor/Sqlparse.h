@@ -67,10 +67,8 @@ typedef struct join{
 	int is_join;
 	Table* table_;
 	JoinNode *left, *right;
-	Page page_;
 	char* join_row;
-	int pid;
-	int rid;
+	PIterator row_iter;
 	WhereNode* condition;
 }JoinNode;
 
@@ -97,23 +95,13 @@ typedef struct query{
 		SelectNode* select_node;
 		UpdateNode* update_node;
 	};
-
-
-	//Vector insert_rows, select_cols; 
-	//enum Tokentype con_type; // WHERE SELECT JOIN INSERT
-	//QueryNode *left_con, *right_con, *rows_node;
-
-	//enum Tokentype operator_; // and or not  eq ex...
-	//Pair left_opand, right_opand;
-
-	//FHead file_;
 }QueryNode;
 
 QueryNode* new_insert_query(void);
 QueryNode* new_select_query(void);
 InsertNode* new_insert_node(void);
 SelectNode* new_select_node(void);
-JoinNode* new_join_node(const Table* table);
+JoinNode* new_join_node(PBM bm,const Table* table);
 JoinNode* join_lr(JoinNode* left, JoinNode* right);
 
 DBitems* new_dbitem();

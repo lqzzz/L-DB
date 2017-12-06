@@ -1,10 +1,16 @@
 #include "../BaseStruct/Listhead.h"
 #include "BufferManager.h"
 #include "Page.h"
-
-#define DIRTY 1
-#define NOT_DIRTY 0
-
+#include"../Mem/MemPool.h"
+#include<string.h>
+typedef struct piter{
+	size_t pid;
+	size_t rid;
+	FHead file;
+	Page page;
+	PBM bm;
+	const char* row;
+};
 struct buffermanager {
 	Listhead bm_list;
 	int DB_id;
@@ -20,14 +26,10 @@ static PBM bm_list_head = NULL;
 __inline static FHead find_file_head(PBM bm, const char* filename);
 __inline static FHead find_file_head(PBM bm, const char* filename);
 
-static Page get_page(PBM bm, const char* filename, size_t pid) {
-	FHead file_head = find_file_head(bm, filename);
-	size_t page_id;
-	if ((page_id = next_page_id(file_head, &pid)) == P_ERROR)
-		return NULL;
+static Page get_page(PBM bm, FHead file_head, size_t pid) {
 	Page page_;
-	if ((page_ = file_get_mem_page(file_head, page_id)) == NULL) {
-		page_ = file_get_new_page(file_head, page_id);
+	if ((page_ = file_get_mem_page(file_head, pid)) == NULL) {
+		page_ = load_page(file_head, pid);
 		if (bm->p_lru_list == NULL)
 			bm->p_lru_list = page_;
 		else LIST_ADD_TAIL(&bm->p_lru_list->head, &page_->head);
@@ -68,37 +70,20 @@ void bm_add_raw_file_head(PBM bm, FHead filehead) {
 	else LIST_ADD_TAIL(&bm->file_head_list->head, &filehead->head);
 }
 
-Page buf_get_page(PBM bm, const char* filename, int pid) {
-	if (pid > PageCount)
-		return NULL;
-
-	FHead file_head = find_file_head(bm, filename);
+int buf_insert(PBM bm, const char* filename, const char* row){
+	FHead file_ = find_file_head(bm, filename);
+	int page_id;
 	Page page_;
-	
-	if ((page_ = file_get_mem_page(file_head, pid)) == NULL) {
-		//
-		page_ = file_get_new_page(file_head, pid);
+	if ((page_id = file_get_insert_pid(file_)) == P_ERROR) {
+		page_ = file_new_page(file_, file_->info.page_count++);
 		if (bm->p_lru_list == NULL)
 			bm->p_lru_list = page_;
 		else LIST_ADD_TAIL(&bm->p_lru_list->head, &page_->head);
-	}
-	return page_;
-}
 
-int buf_insert(PBM* bm, const char* filename, const char* row){
-	FHead file_ = find_file_head(bm, filename);
+	}else 
+		page_ = get_page(bm, file_, page_id);
 
-	int page_id = file_get_not_full_page_id(file_);
-	
-	Page page_ = get_page(bm,filename,page_id);
-
-	int slot_index = page_get_empty_slot(page_);
-
-	page_add_row(page_, slot_index, row);
-
-	if (page_->slot_count == page_->info.used_slot_size)
-		file_->info.page_states[page_id] = P_FULL;
-	page_->is_dirty = 1;
+	page_add_row(file_,page_, row);
 
 	return P_OK;
 }
@@ -110,4 +95,37 @@ PBM get_buffman(int DBid){
 			break;
 	);
 	return bm_;
+}
+
+PIterator get_table_iter(PBM bm, const char* filename){
+	PIterator i = mem_alloc(sizeof(*i));
+	i->bm = bm;
+	i->rid = 0;
+	FHead f = i->file = find_file_head(bm, filename);
+	Page p = i->page = get_page(bm, f, i->pid = 0);
+	i->row = p->rows_head;
+	return i;
+}
+
+const char* next_row(PIterator i){
+	char* row;
+	if ((row = i->row) == NULL)
+		return NULL;
+
+	if (i->rid != i->page->info.used_slot_size) {
+		i->row = i->page->rows_head + i->page->row_len * ++i->rid;
+		return row;
+	}
+
+	if (++i->pid < i->file->info.page_count) {
+		i->rid = 0;
+		i->row = (i->page = get_page(i->bm, i->file, i->pid))
+			->rows_head;
+		return row;
+	}
+
+	i->row = NULL;
+
+	return row;
+
 }

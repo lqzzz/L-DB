@@ -1,6 +1,7 @@
 #include "../Mem/MemPool.h"
 #include "Sqlparse.h"`
 #include "../StorageEngine/BufferManager.h"
+
 QueryNode* new_select_query(void){
 	QueryNode* n = mem_alloc(sizeof(*n));
 	n->type = SELECT;
@@ -8,9 +9,10 @@ QueryNode* new_select_query(void){
 	return n;
 }
 
-JoinNode* new_join_node(const Table* table){
+JoinNode* new_join_node(PBM bm, const Table* table){
 	JoinNode* n = mem_calloc(1,sizeof(JoinNode));
 	n->table_ = table;
+	n->row_iter = get_table_iter(bm, table->t_info.table_name);
 	return n;
 }
 
@@ -25,8 +27,6 @@ JoinNode* join_lr(JoinNode* left, JoinNode* right){
 	n->join_row = mem_alloc(left_len + right_len);
 	return n;
 }
-
-
 
 QueryNode* new_insert_query(){
 	QueryNode* n = mem_alloc(sizeof(QueryNode));
@@ -97,6 +97,7 @@ ERROR:
 	return NULL;
 }
 
+
 DBitems* new_dbitem(){
 	DBitems* i = mem_alloc(sizeof(DBitems));
 	LIST_INIT(&i->head);
@@ -119,7 +120,6 @@ void free_dbitem(DBitems* i) {
 void free_dbitem_list(DBitems* h) {
 	LIST_DEL_ALL(&h->head, free_dbitem);
 }
-
 
 int get_item_list(char* errmsg,DBitems** ph, DBnode* db, Token** curr,int flag) {
 	for (;;) {
@@ -216,20 +216,3 @@ int sql_parse(char* errmsg,DBnode *db, Token* token_head,QueryNode** pnode) {
 ERROR: 
 	return SQL_ERROR;
 }
-
-
-//int execute_select(char * errmsg, DBnode * db, JoinNode* sel){
-//		
-//	return 0;
-//}
-//
-//int execute_get_row(char * errmsg, DBnode * db, JoinNode* j) {
-//	if(j->table_)
-//		
-//
-//}
-//
-//int execute_select(char * errmsg, DBnode * db, JoinNode* sel) {
-//
-//}
-//int 
