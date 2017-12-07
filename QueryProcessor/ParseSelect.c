@@ -76,26 +76,16 @@ char* execute_from(DBnode* db, JoinNode* join) {
 		memcpy(join_row + left_len, 
 			execute_from(db, join->right), right_len);
 		return join_row;
-	}else {
-		if ((join->rid = get_row_index(join->page_, join->rid)) == P_ERROR) {
-			PBM bm = get_buffman(db->id_);
-			join->pid++;
-			join->rid = 0;
-			if ((join->page_ = buf_get_page(bm, TABLE_GET_NAME(join->table_), join->pid)) == NULL)
-				return SQL_ERROR;
-		}
-		return page_get_row(join->page_, join->rid++);
-	}
+	}else 
+		return next_row(join->row_iter);
 }
 
 int execute_select(char* errmsg,DBnode* db,SelectNode* sel) {
 	char* row = execute_from(db, sel->join);
-	WhereNode* con;
-	if (sel->condition) {
-			
-	}else {
+	WhereNode* con; 
+	if ((con = sel->condition) == NULL);
 		return row;
-	}
+
 }
 
 int execute_where(char* row,int ref, DBnode* db, WhereNode* con) {

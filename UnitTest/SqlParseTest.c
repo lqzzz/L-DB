@@ -54,8 +54,7 @@ void sql_test_init(void) {
 
 	new_bufferManager(test_db->id_);
 	PBM b = get_buffman(test_db->id_);
-	FHead f =	new_file_head("test_table", 
-			new_file_head_data(PageCount, 16, 24));
+	FHead f = new_file_head("test_table", 16, 24);
 	init_file(f);
 	bm_add_raw_file_head(b, f);
 	//list_len(b->)

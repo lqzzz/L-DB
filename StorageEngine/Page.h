@@ -52,9 +52,7 @@ struct file {
 	}info;
 };
 
-
-
-FHead* new_file_head(const char* filename,size_t pagecount,
+FHead* new_file_head(const char* filename,
 	size_t rowslotcount,size_t rowlen);
 
 void write_file_head(FHead fh);

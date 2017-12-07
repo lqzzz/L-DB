@@ -9,7 +9,7 @@ int parse_create(char* errmsg,DBnode* dbnode, Token** curr) {
 		if ((table_ = parse_create_table(errmsg,dbnode, curr)) == NULL)
 			goto ERROR;
 		db_add_table(dbnode, table_);
-		FHead fh = new_file_head(table_->t_info.table_name, 0,
+		FHead fh = new_file_head(table_->t_info.table_name,
 			table_->t_info.table_page_solt_count, table_->t_info.table_data_len);
 		init_file(fh);
 		bm_add_raw_file_head(get_buffman(dbnode->id_), fh);

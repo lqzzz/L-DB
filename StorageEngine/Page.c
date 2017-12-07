@@ -31,15 +31,15 @@ void init_file(FHead fh){
 FHead new_empty_file() {
 	FHead fh = mem_alloc(sizeof(struct filehead) + PageSize);
 	LIST_INIT(&fh->head);
+	fh->info.page_count = 0;
 	return fh;
 }
 
-FHead* new_file_head(const char* filename,size_t pagecount,
+FHead* new_file_head(const char* filename,
 	size_t rowslotcount,size_t rowlen){
 
 	FHead fh = new_empty_file();
 	fh->filename_ = filename;
-	fh->info.page_count = pagecount;
 	fh->info.row_len = rowlen;
 	fh->info.row_slot_count = rowslotcount;
 	fh->mem_page_bit_map = mem_calloc(1, sizeof(Page) * pagecount);
