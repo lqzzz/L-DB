@@ -11,17 +11,17 @@ int test_pass = 0;
 //}
 
 void dict_test(void);
-void page_test(void);
+void file_page_test(void);
 void meta_test(void);
 void scanner_test(void);
 void sqltest(void);
 
 int main(void) {
-	scanner_test();
-	dict_test();
-	page_test();
-	meta_test();
-	sqltest();
+	//scanner_test();
+	//dict_test();
+	file_page_test();
+	//meta_test();
+	//sqltest();
 	printf("%d/%d (%3.2f%%) passed\n", test_pass, test_count, test_pass * 100.0 / test_count);
 }
 

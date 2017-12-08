@@ -1,15 +1,51 @@
 #include"TestFrameWork.h"
 #include"../StorageEngine/Page.h"
 #include"../StorageEngine/BufferManager.h"
-
-static void page_head_test(FHead f) {
-	init_file(f);
-	FHead fh = read_file_head("test.data", f->info.row_len,
-		f->info.row_slot_count);
-	EXPECT_EQ_INT(f->info.row_len, fh->info.row_len);
+static FHead file;
+static Page p1, p2;
+static void test_init() {
+	size_t rowlen = 36;
+	size_t rps = PageSize - 2 * sizeof(size_t);
+	size_t rsn = rps / rowlen;
+	while (rsn * rowlen + rsn > rps) rsn--;
+	file = new_file_head("test.data", rsn, 36);
 }
 
-static void page_next_test(FHead f) {
+static void file_init_test() {
+	init_file(file);
+	FHead fh = read_file_head("test.data");
+	EXPECT_EQ_INT(file->info.row_len, fh->info.row_len);
+}
+
+static void file_get_insert_test() {
+	EXPECT_EQ_INT(P_ERROR, file_get_insert_pid(file));
+	Page p = file_new_page(file,0);
+	EXPECT_EQ_INT(0, file_get_insert_pid(file));
+	page_free(p);
+	file->info.page_count--;
+}
+
+static file_get_mem_test() {
+	Page p = file_get_mem_page(file, 0);
+	EXPECT_EQ_INT(NULL, p);
+	file_new_page(file,0);
+	p = file_get_mem_page(file, 0);
+	EXPECT_EQ_INT(file->info.row_slot_count, p->slot_count);
+	EXPECT_EQ_INT(0, p->page_id);
+	page_free(p);
+	file->info.page_count--;
+	EXPECT_EQ_INT(0, file->info.page_count);
+	p = file_get_mem_page(file, 0);
+	EXPECT_EQ_INT(NULL, p);
+}
+
+static void file_head_test() {
+	file_init_test();
+	file_get_insert_test();
+	file_get_mem_test();
+}
+
+static void page_test(FHead f) {
 
 	//Page p = new_page(f->filehead->row_len, f->filehead->row_slot_count);
 	//for (size_t i = 0; i < f->filehead->page_count; i++) {
@@ -62,19 +98,10 @@ static void page_test_add_row(FHead f) {
 	EXPECT_EQ_STR(page_get_row(pd,26), "pd r27");
 }
 
-void page_test(void) {
+void file_page_test(void) {
+	test_init();
+	file_head_test();
 
-	size_t rowlen = 36;
-	size_t rps = PageSize - 2 * sizeof(size_t);
-	size_t rsn = rps / rowlen;
-	while (rsn * rowlen + rsn > rps) rsn--;
-
-	FHead fh = new_file_head("test.data", rsn, 36);
-
-	page_head_test(fh);
-	//page_next_test(fh);
-	page_test_add_row(fh);
-
-	remove(fh->filename_);
+	remove(file->filename_);
 }
 

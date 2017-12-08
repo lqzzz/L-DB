@@ -125,7 +125,7 @@ ERROR:
 }
 
 int execute_insert(DBnode* db, InsertNode* insert) {
-	BufferManager* bm = get_buffman(db->id_);
+	PBM bm = get_buffman(db->id_);
 	buf_insert(bm, insert->table_item->table_->t_info.table_name, insert->insert_row);
 	return SQL_OK;
 }

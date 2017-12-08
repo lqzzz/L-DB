@@ -83,7 +83,7 @@ int buf_insert(PBM bm, const char* filename, const char* row){
 	}else 
 		page_ = get_page(bm, file_, page_id);
 
-	page_add_row(file_,page_, row);
+	page_add_row(page_, page_get_empty_slot(page_), row);
 
 	return P_OK;
 }

@@ -1,13 +1,11 @@
 #ifndef _TOKENIZER_H
 #define _TOKENIZER_H
-
 #include <stdio.h>
-
 #include "../Catalog.h"
 #include"Scanner.h"
-#include"../BaseStruct/Pair.h"
 #include"../StorageEngine/Page.h"
 #include"../Mem/obj.h"
+#include"../StorageEngine/BufferManager.h"
 
 #define SQL_ERROR -1
 #define SQL_OK 1

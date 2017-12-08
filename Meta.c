@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include<sys\stat.h>
 #include"StorageEngine\BufferManager.h"
-
 typedef struct {
 	size_t db_num;
 	char dbname[NAME_LEN];
@@ -70,7 +69,7 @@ int read_database_info(void) {
 			fread(&info, sizeof(DatabaseInfo), 1, fd);
 			DBnode *next_ = database_create(info.dbname, 
 				info.db_num, info.table_count);
-			new_bufferManager(next_->id_);
+			new_buffermanager(next_->id_);
 			if (dbhead == NULL)
 				dbhead = next_;
 			else LIST_ADD_TAIL(&dbhead->list_head, &next_->list_head);
@@ -105,8 +104,7 @@ int read_table_info(void) {
 			DBnode* db_ = DBNODE_SEARCH(dbhead, info->table_db_name);
 
 			bm_add_raw_file_head(get_buffman(db_->id_),
-				read_file_head(info->table_name,
-					info->table_data_len, info->table_page_solt_count));
+				read_file_head(info->table_name));
 
 			db_add_table(db_, t);
 		}

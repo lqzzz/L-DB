@@ -37,17 +37,16 @@ FHead new_empty_file() {
 
 FHead* new_file_head(const char* filename,
 	size_t rowslotcount,size_t rowlen){
-
 	FHead fh = new_empty_file();
 	fh->filename_ = filename;
 	fh->info.row_len = rowlen;
 	fh->info.row_slot_count = rowslotcount;
-	fh->mem_page_bit_map = mem_calloc(1, sizeof(Page) * pagecount);
+	fh->mem_page_bit_map = mem_calloc(1, sizeof(Page) * fh->info.page_count);
 	return fh;
 }
 
 
-FHead read_file_head(const char* filename,size_t rowlen,size_t rowslotcount) {
+FHead read_file_head(const char* filename){
 	FILE* fd_;
 
 	FHead f = new_empty_file();
@@ -123,24 +122,18 @@ Page file_new_page(FHead f,size_t pid){
 	p->slot_count = f->info.row_slot_count;
 	p->row_len = f->info.row_len;
 	p->rows_head = p->info.slot_states + p->slot_count * sizeof(char);
-
 	p->f = f;
 	p->page_id = pid;
+	f->mem_page_bit_map = mem_realloc(f->mem_page_bit_map, sizeof(Page) * ++f->info.page_count);
 	f->mem_page_bit_map[pid] = p;
-
 	return p;
 }
 
-int page_del(FHead f, Page p){
-	f->mem_page_bit_map[p->page_id] = NULL;
-	return page_free(p);
-}
-
-int page_add_row(FHead f,Page p,const char* row){
-	int index = 0;
-	for (; p->slot_count; index++)
-		if (p->info.slot_states[index] == R_EMPTY)
-			break;
+int page_add_row(Page p,size_t index,const char* row){
+	//int index = 0;
+	//for (; p->slot_count; index++)
+	//	if (p->info.slot_states[index] == R_EMPTY)
+	//		break;
 
 	size_t offset = index* p->row_len;
 
@@ -149,7 +142,7 @@ int page_add_row(FHead f,Page p,const char* row){
 	p->info.slot_states[index] = R_NOT_EMPTY;
 
 	if (p->slot_count == ++p->info.used_slot_size)
-		f->info.page_states[p->page_id] = P_FULL;
+		p->f->info.page_states[p->page_id] = P_FULL;
 
 	p->is_dirty = 1;
 
@@ -162,4 +155,9 @@ int page_get_empty_slot(Page p){
 			return index;
 	}
 	return P_ERROR;
+}
+
+char* page_get_row(Page p, size_t rid){
+	
+	return NULL;
 }

@@ -52,7 +52,7 @@ void sql_test_init(void) {
 	table_add_col(t2, col6);
 	db_add_table(test_db, t2);
 
-	new_bufferManager(test_db->id_);
+	new_buffermanager(test_db->id_);
 	PBM b = get_buffman(test_db->id_);
 	FHead f = new_file_head("test_table", 16, 24);
 	init_file(f);

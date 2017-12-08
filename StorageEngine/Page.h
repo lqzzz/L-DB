@@ -22,7 +22,7 @@ struct p {
 
 	struct phead{
 		Listhead head;
-		const FHead f;
+		FHead f;
 		size_t page_id;
 		size_t row_len;
 		size_t slot_count;
@@ -57,8 +57,7 @@ FHead* new_file_head(const char* filename,
 
 void write_file_head(FHead fh);
 
-FHead read_file_head(const char* filename, size_t rowlen, 
-	size_t rowslotcount);
+FHead read_file_head(const char* filename);
 
 void init_file(FHead fh);
 
@@ -70,11 +69,11 @@ int store_page(Page, FHead);
 
 int page_free(Page p);
 
-int page_del(FHead f, Page p);
-
-int page_add_row(FHead f, Page p, const char* row);
+int page_add_row(Page p, size_t index, const char* row);
 
 int page_get_empty_slot(Page p);
+
+char* page_get_row(Page p,size_t rid);
 
 Page file_get_mem_page(FHead f, size_t pageid);
 
