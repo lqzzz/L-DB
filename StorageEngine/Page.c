@@ -3,6 +3,7 @@
 #include"Page.h"
 #include<string.h>
 #include<assert.h>
+
 int get_row_index(Page p,size_t rowindex) {
 	if (rowindex >= p->info.used_slot_size)
 		return P_ERROR;
@@ -158,6 +159,5 @@ int page_get_empty_slot(Page p){
 }
 
 char* page_get_row(Page p, size_t rid){
-	
-	return NULL;
+	return p->rows_head + rid * p->row_len;
 }

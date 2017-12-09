@@ -113,7 +113,7 @@ const char* next_row(PIterator i){
 		return NULL;
 
 	if (i->rid != i->page->info.used_slot_size) {
-		i->row = i->page->rows_head + i->page->row_len * ++i->rid;
+		i->row = page_get_row(i->page, ++i->rid);
 		return row;
 	}
 
