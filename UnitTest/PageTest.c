@@ -47,13 +47,7 @@ static void file_head_test() {
 
 static void page_test(FHead f) {
 
-	//Page p = new_page(f->filehead->row_len, f->filehead->row_slot_count);
-	//for (size_t i = 0; i < f->filehead->page_count; i++) {
-	//	load_page(p, i, f);
-	//	EXPECT_EQ_INT(i, p->pdata.page_id);
-	//	EXPECT_EQ_INT(f->filehead->row_len, p->row_len);
-	//}
-	//mem_free(p);
+
 }
 
 static void page_test_add_row(FHead f) {
