@@ -10,6 +10,8 @@ QueryNode* new_select_query(void){
 }
 
 JoinNode* new_join_node(PBM bm, const Table* table){
+	if (table->t_info.table_rec_size == 0)
+		return NULL;
 	JoinNode* n = mem_calloc(1,sizeof(JoinNode));
 	n->table_ = table;
 	n->row_iter = get_table_iter(bm, table->t_info.table_name);

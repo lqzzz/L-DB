@@ -18,11 +18,11 @@ static void file_init_test() {
 }
 
 static void file_get_insert_test() {
-	EXPECT_EQ_INT(P_ERROR, file_get_insert_pid(file));
-	Page p = file_new_page(file,0);
-	EXPECT_EQ_INT(0, file_get_insert_pid(file));
-	page_free(p);
-	file->info.page_count--;
+	//EXPECT_EQ_INT(P_ERROR, file_get_insert_pid(file));
+	//Page p = file_new_page(file,0);
+	//EXPECT_EQ_INT(0, file_get_insert_pid(file));
+	//page_free(p);
+	//file->info.page_count--;
 }
 
 static file_get_mem_test() {
