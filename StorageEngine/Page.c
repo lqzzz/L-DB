@@ -10,7 +10,6 @@ int get_row_index(Page p,size_t rowindex) {
 	return rowindex;
 }
 
-//必须调用过init_file
 void write_file_head(FHead f){
 	FILE* fd_ = fopen(f->filename_, "rb+");
 	fwrite(&f->info, PageSize, 1, fd_);
